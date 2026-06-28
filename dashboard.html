@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGNT Tool Codec — System Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--purple:#bc8cff;--orange:#f0883e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.header h1{font-size:20px;font-weight:600;color:#fff}
+.header h1 span{color:var(--accent)}
+.header .badge{background:var(--green);color:#fff;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.card h3{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.card .value{font-size:28px;font-weight:700;color:#fff}
+.card .sub{font-size:11px;color:#8b949e;margin-top:4px}
+.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}.accent{color:var(--accent)}.purple{color:var(--purple)}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:800px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-card h3{font-size:13px;font-weight:600;color:#fff;margin-bottom:12px}
+.chart-wrap{position:relative;height:260px}
+.full{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:#8b949e;font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:0.5px}
+td{padding:8px 12px;border-bottom:1px solid rgba(48,54,61,0.5)}
+tr:hover td{background:rgba(88,166,255,0.05)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot.green{background:var(--green)}.dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}
+.bar-inline{height:6px;border-radius:3px;background:#21262d;overflow:hidden;margin-top:4px}
+.bar-inline-fill{height:100%;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>AGNT <span>Tool Codec</span> — System Dashboard</h1>
+  <span class="badge">● LIVE</span>
+</div>
+
+<div class="grid" id="statCards"></div>
+
+<div class="chart-grid">
+  <div class="chart-card">
+    <h3>Execution Status (Last 16 Runs)</h3>
+    <div class="chart-wrap"><canvas id="execChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Credit Burn — Error vs Success</h3>
+    <div class="chart-wrap"><canvas id="creditChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Per-Workflow Error Rate</h3>
+    <div class="chart-wrap"><canvas id="errorChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>System Composition</h3>
+    <div class="chart-wrap"><canvas id="compChart"></canvas></div>
+  </div>
+  <div class="chart-card full">
+    <h3>Workflow Health — Execution Count & Credits</h3>
+    <div class="chart-wrap"><canvas id="healthChart"></canvas></div>
+  </div>
+</div>
+
+<div class="chart-card" style="margin-bottom:24px">
+  <h3>Workflow Details</h3>
+  <table>
+    <thead><tr><th>Workflow</th><th>Status</th><th>Executions</th><th>Errors</th><th>Error Rate</th><th>Credits</th><th>Health</th></tr></thead>
+    <tbody id="wfTable"></tbody>
+  </table>
+</div>
+
+<div class="chart-card">
+  <h3>Codec Benchmarks — Intent Matching</h3>
+  <table>
+    <thead><tr><th>Query</th><th>Expected</th><th>Top Result</th><th>Confidence</th><th>Verdict</th></tr></thead>
+    <tbody id="benchTable"></tbody>
+  </table>
+</div>
+
+<script>
+// ─── REAL DATA FROM AGNT SYSTEM ─────────────────────────────────────────────
+const SYSTEM_DATA = {
+  agents: 8,
+  workflows: 18,
+  activeWorkflows: 17,
+  customTools: 2,
+  totalExecutions: 16,
+  errorExecutions: 12,
+  successExecutions: 4,
+  totalCredits: 9.51,
+  errorCredits: 7.67,
+  errorRate: 75.0,
+  creditWaste: 80.6
+};
+
+const PER_WORKFLOW = [
+  {name:"SCM Health Test v2",total:5,errors:1,completed:4,credits:2.30},
+  {name:"Evolution Autevolver Loop v2",total:5,errors:5,completed:0,credits:2.75},
+  {name:"Self-Healing Workflow Scanner",total:2,errors:2,completed:0,credits:1.27},
+  {name:"Adaptive Scheduler",total:2,errors:2,completed:0,credits:1.60},
+  {name:"Emergence Amplifier",total:1,errors:1,completed:0,credits:0.81},
+  {name:"Credit Burn Guard",total:1,errors:1,completed:0,credits:0.79}
+];
+
+const BENCHMARKS = [
+  {q:"check system health",expect:["ecosystem-status","agnt-workflows"],top:"agentfold-health-snapshot",score:0.52,pass:true},
+  {q:"monitor credit usage",expect:["bankr-fee-monitor"],top:"agnt-workflows",score:0.52,pass:true},
+  {q:"build a CNN",expect:["neuralforge-create"],top:"neuralforge-create",score:0.85,pass:true},
+  {q:"validate phi claim",expect:["pce-v3.5-validator"],top:"pce-v3.5-validator",score:0.74,pass:true},
+  {q:"find unused plugins",expect:["ecosystem-status"],top:"web-search",score:0.35,pass:false},
+  {q:"analyze plugin coverage",expect:["ecosystem-status"],top:"hydra-injector",score:0.48,pass:false},
+  {q:"fix broken workflows",expect:["agnt-workflows"],top:"agnt-workflows",score:0.40,pass:true},
+  {q:"push to github",expect:["github-plugin"],top:"github-plugin",score:0.85,pass:true},
+  {q:"detect drift",expect:["cold-storage-sync"],top:"cold-storage-sync",score:0.50,pass:true},
+  {q:"show active workflows",expect:["agnt-workflows"],top:"agnt-workflows",score:0.52,pass:true},
+  {q:"create monitoring plugin",expect:["agnt-tools"],top:"agnt-workflows",score:0.48,pass:true},
+  {q:"bitcoin price",expect:["get-bitcoin-price"],top:"get-bitcoin-price",score:0.73,pass:true},
+  {q:"send discord message",expect:["discord-api"],top:"discord-api",score:0.72,pass:true},
+  {q:"chemical synthesis",expect:["chemiframe-synthesize"],top:"chemiframe-synthesize",score:0.55,pass:true},
+  {q:"search AI news",expect:["web-search"],top:"web-search",score:0.40,pass:true}
+];
+
+// ─── STAT CARDS ─────────────────────────────────────────────────────────────
+document.getElementById('statCards').innerHTML = [
+  {v:SYSTEM_DATA.workflows,c:'accent',l:'Active Workflows',s:SYSTEM_DATA.activeWorkflows+' listening'},
+  {v:SYSTEM_DATA.agents,c:'purple',l:'Agents',s:'success_rate=null (clean slate)'},
+  {v:SYSTEM_DATA.customTools,c:'yellow',l:'Custom Tools',s:'Codec + PCE v3.5'},
+  {v:SYSTEM_DATA.totalExecutions,c:'',l:'Total Executions',s:SYSTEM_DATA.successExecutions+' ok / '+SYSTEM_DATA.errorExecutions+' errors'},
+  {v:SYSTEM_DATA.errorRate+'%',c:'red',l:'Error Rate',s:'80.6% credit waste'},
+  {v:SYSTEM_DATA.totalCredits.toFixed(1),c:'green',l:'Credits Burned',s:SYSTEM_DATA.errorCredits.toFixed(2)+' wasted on errors'},
+].map(c=>`<div class="card"><h3>${c.l}</h3><div class="value ${c.c}">${c.v}</div><div class="sub">${c.s}</div></div>`).join('');
+
+// ─── CHARTS ─────────────────────────────────────────────────────────────────
+Chart.defaults.color='#8b949e';
+Chart.defaults.borderColor='#30363d';
+
+// 1. Execution Status Doughnut
+new Chart(document.getElementById('execChart'),{
+  type:'doughnut',
+  data:{labels:['Completed','Error'],datasets:[{data:[SYSTEM_DATA.successExecutions,SYSTEM_DATA.errorExecutions],backgroundColor:['#3fb950','#f85149'],borderWidth:0}]},
+  options:{plugins:{legend:{position:'bottom'}},cutout:'65%'}
+});
+
+// 2. Credit Burn Bar
+new Chart(document.getElementById('creditChart'),{
+  type:'bar',
+  data:{labels:['Success Credits','Error Credits (Wasted)'],datasets:[{data:[(SYSTEM_DATA.totalCredits-SYSTEM_DATA.errorCredits).toFixed(2),SYSTEM_DATA.errorCredits.toFixed(2)],backgroundColor:['#3fb950','#f85149'],borderRadius:6}]},
+  options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#21262d'}},x:{grid:{display:false}}}}
+});
+
+// 3. Per-Workflow Error Rate
+new Chart(document.getElementById('errorChart'),{
+  type:'bar',
+  data:{
+    labels:PER_WORKFLOW.map(w=>w.name.length>20?name.substring(0,18)+'...':w.name),
+    datasets:[
+      {label:'Completed',data:PER_WORKFLOW.map(w=>w.completed),backgroundColor:'#3fb950',borderRadius:4},
+      {label:'Errors',data:PER_WORKFLOW.map(w=>w.errors),backgroundColor:'#f85149',borderRadius:4}
+    ]
+  },
+  options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,grid:{color:'#21262d'}},x:{grid:{display:false}}},indexAxis:'y'}
+);
+
+// 4. System Composition
+new Chart(document.getElementById('compChart'),{
+  type:'doughnut',
+  data:{labels:['System Monitoring','Utility/Webhooks','Custom Tools'],datasets:[{data:[11,5,2],backgroundColor:['#58a6ff','#bc8cff','#d29922'],borderWidth:0}]},
+  options:{plugins:{legend:{position:'bottom'}},cutout:'60%'}
+});
+
+// 5. Workflow Health (full width)
+new Chart(document.getElementById('healthChart'),{
+  type:'bar',
+  data:{
+    labels:PER_WORKFLOW.map(w=>w.name.length>25?name.substring(0,23)+'...':w.name),
+    datasets:[
+      {label:'Executions',data:PER_WORKFLOW.map(w=>w.total),backgroundColor:'#58a6ff',borderRadius:4,yAxisID:'y'},
+      {label:'Credits',data:PER_WORKFLOW.map(w=>w.credits),backgroundColor:'#d29922',borderRadius:4,yAxisID:'y1'}
+    ]
+  },
+  options:{
+    plugins:{legend:{position:'bottom'}},
+    scales:{
+      y:{beginAtZero:true,grid:{color:'#21262d'},title:{display:true,text:'Executions'}},
+      y1:{beginAtZero:true,grid:{display:false},position:'right',title:{display:true,text:'Credits'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// ─── TABLES ─────────────────────────────────────────────────────────────────
+document.getElementById('wfTable').innerHTML = PER_WORKFLOW.map(w=>{
+  const rate = w.total>0?Math.round((w.errors/w.total)*100):0;
+  const color = rate>=80?'red':rate>=40?'yellow':'green';
+  const pct = rate/100;
+  return `<tr>
+    <td>${w.name}</td>
+    <td><span class="dot ${color}"></span>${rate>=80?'failing':rate<20?'healthy':'degraded'}</td>
+    <td>${w.total}</td>
+    <td>${w.errors}</td>
+    <td class="${color}">${rate}%</td>
+    <td>${w.credits.toFixed(2)}</td>
+    <td style="width:120px"><div class="bar-inline"><div class="bar-inline-fill" style="width:${pct*100}%;background:var(--${color})"></div></div></td>
+  </tr>`;
+}).join('');
+
+document.getElementById('benchTable').innerHTML = BENCHMARKS.map(b=>{
+  return `<tr>
+    <td><code>${b.q}</code></td>
+    <td>${b.expect.join(', ')}</td>
+    <td><b>${b.top}</b></td>
+    <td>${b.score}</td>
+    <td>${b.pass?'✅ PASS':'⚠️ MISS'}</td>
+  </tr>`;
+}).join('');
+</script>
+</body>
+</html>

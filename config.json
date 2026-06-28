@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "maxTools": 8,
+  "minThreshold": 0.40,
+  "tokenBudget": 8700,
+  "domainBoost": 0.15,
+  "historyBoost": 0.10,
+  "historyWindow": 20,
+  "logSelections": true,
+  "fallbackTools": [
+    "execute_javascript",
+    "web_search",
+    "file_operations"
+  ],
+  "intentPatterns": {
+    "monitor": ["check", "status", "health", "monitor", "watch", "track", "observe", "survey", "inspect", "diagnose"],
+    "create": ["create", "build", "make", "generate", "write", "compose", "design", "forge", "craft", "spawn"],
+    "search": ["find", "search", "look", "locate", "discover", "query", "fetch", "retrieve", "get", "list"],
+    "analyze": ["analyze", "evaluate", "assess", "review", "study", "examine", "investigate", "benchmark", "compare"],
+    "fix": ["fix", "repair", "resolve", "debug", "patch", "correct", "heal", "restore", "remediate"],
+    "deploy": ["deploy", "release", "publish", "push", "ship", "launch", "install", "activate"],
+    "configure": ["configure", "setup", "set", "update", "change", "modify", "adjust", "tune", "optimize"]
+  },
+  "domains": {
+    "system": ["scm", "health", "monitor", "scheduler", "workflow", "execution", "coherence"],
+    "finance": ["credit", "burn", "wallet", "balance", "transaction", "cost", "bitcoin", "price"],
+    "development": ["code", "git", "github", "build", "test", "deploy", "ci", "neuralforge"],
+    "data": ["analyze", "query", "search", "index", "corpus", "dataset", "benchmark"],
+    "communication": ["discord", "slack", "email", "telegram", "message", "notify"],
+    "science": ["chemistry", "phi", "math", "validate", "synthesize", "reaction"]
+  }
+}
