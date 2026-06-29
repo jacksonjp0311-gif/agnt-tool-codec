@@ -15,18 +15,29 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
     top1 = 0
     top3 = 0
     covered = 0
+    strict_top1 = 0
+    strict_top3 = 0
+    strict_covered = 0
     static_tokens = 0
     selected_tokens = 0
 
     for case in cases:
         message = case["message"]
         expected = set(case.get("expected_tools", []))
+        acceptable = set(case.get("acceptable_tools", []))
+        target = expected | acceptable
         result = codec.select(message)
         metadata = result["metadata"]
         selected = [item["tool"] for item in result["selected"]]
-        hit_top1 = bool(selected and selected[0] in expected)
-        hit_top3 = bool(expected & set(selected[:3]))
-        hit_any = bool(expected & set(selected))
+        strict_hit_top1 = bool(selected and selected[0] in expected)
+        strict_hit_top3 = bool(expected & set(selected[:3]))
+        strict_hit_any = bool(expected & set(selected))
+        hit_top1 = bool(selected and selected[0] in target)
+        hit_top3 = bool(target & set(selected[:3]))
+        hit_any = bool(target & set(selected))
+        strict_top1 += int(strict_hit_top1)
+        strict_top3 += int(strict_hit_top3)
+        strict_covered += int(strict_hit_any)
         top1 += int(hit_top1)
         top3 += int(hit_top3)
         covered += int(hit_any)
@@ -35,7 +46,11 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
         results.append({
             "message": message,
             "expected": sorted(expected),
+            "acceptable": sorted(acceptable),
             "selected": selected,
+            "strictTop1": strict_hit_top1,
+            "strictTop3": strict_hit_top3,
+            "strictCovered": strict_hit_any,
             "top1": hit_top1,
             "top3": hit_top3,
             "covered": hit_any,
@@ -56,6 +71,12 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
             "top3Rate": round(top3 / total, 3) if total else 0,
             "covered": covered,
             "coveredRate": round(covered / total, 3) if total else 0,
+            "strictTop1": strict_top1,
+            "strictTop1Rate": round(strict_top1 / total, 3) if total else 0,
+            "strictTop3": strict_top3,
+            "strictTop3Rate": round(strict_top3 / total, 3) if total else 0,
+            "strictCovered": strict_covered,
+            "strictCoveredRate": round(strict_covered / total, 3) if total else 0,
             "staticTokenEstimate": static_tokens,
             "selectedTokenEstimate": selected_tokens,
             "tokensSaved": tokens_saved,
@@ -88,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
             f"top1={summary['top1Rate']:.3f} "
             f"top3={summary['top3Rate']:.3f} "
             f"covered={summary['coveredRate']:.3f} "
+            f"strict={summary['strictCoveredRate']:.3f} "
             f"savings={summary['savingsRate']:.3f} "
             f"tokens={summary['selectedTokenEstimate']}/{summary['staticTokenEstimate']}"
         )

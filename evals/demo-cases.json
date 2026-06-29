@@ -10,11 +10,13 @@
     },
     {
       "message": "send the team a slack update",
-      "expected_tools": ["send_slack", "slack-plugin"]
+      "expected_tools": ["send_slack", "slack-plugin"],
+      "acceptable_tools": ["discord-api", "telegram-api", "gmail-plugin"]
     },
     {
       "message": "query customer records from the database",
-      "expected_tools": ["query_database", "database_operation"]
+      "expected_tools": ["query_database", "database_operation"],
+      "acceptable_tools": ["query-data"]
     },
     {
       "message": "debug this failing python test",
@@ -22,7 +24,8 @@
     },
     {
       "message": "inspect files in this repo",
-      "expected_tools": ["read_files", "file-operations"]
+      "expected_tools": ["read_files", "file-operations"],
+      "acceptable_tools": ["file_operations"]
     }
   ]
 }

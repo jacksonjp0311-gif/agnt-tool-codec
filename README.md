@@ -259,7 +259,7 @@ agnt-tool-codec-eval --index src/agnt_tool_codec/data/demo-index.json --cases ev
 Example output:
 
 ```text
-cases=6 top1=1.000 top3=1.000 covered=1.000 savings=0.583 tokens=18000/43200
+cases=6 top1=1.000 top3=1.000 covered=1.000 strict=1.000 savings=0.583 tokens=18000/43200
 OK | push these changes to github -> github, execute_python | saved=4800
 ```
 
@@ -274,12 +274,33 @@ tokens saved    = static - selected
 That makes the benchmark dependency-free and easy to run anywhere. For production reporting, plug in your tokenizer of choice and compare the same two surfaces: all schemas versus codec-selected schemas.
 
 On the built-in demo index, the current demo cases save an estimated 58.3% of
-schema tokens while preserving 100% top-3 coverage. On the larger AGNT-oriented
-index, the same generic cases save an estimated 89.1% of schema tokens, but
-coverage drops to 50% because several expected demo tools do not exist under the
-same names. That is the point of the benchmark: it shows both savings and
-selection quality, so metadata gaps become visible instead of hidden behind a
-single token-savings number.
+schema tokens while preserving 100% strict top-3 coverage. On the larger
+AGNT-oriented index, the same generic cases save an estimated 89.1% of schema
+tokens while preserving 100% top-3 coverage when runtime-equivalent tools are
+allowed. Strict exact-name coverage is 66.7%, which is useful signal: some
+runtimes have equivalent tools with different names.
+
+That is the point of the benchmark: it shows both savings and selection quality,
+so metadata gaps become visible instead of hidden behind a single token-savings
+number.
+
+## What We Learned
+
+- Context bloat is measurable. On the full AGNT-oriented index, the benchmark
+  compares 460,800 estimated static schema tokens against 50,400 selected schema
+  tokens across six prompts.
+- Token savings alone are not enough. A selector can save 89% of schema tokens
+  and still be wrong if the capability index is thin or mismatched.
+- Exact-name evals and runtime-equivalent evals answer different questions.
+  Strict coverage tells you whether a specific named tool was selected.
+  Equivalent coverage tells you whether the runtime still has a valid way to do
+  the job.
+- Metadata quality is the ceiling. Adding `files`, `repo`, `repository`,
+  `source`, and `inspect` to `file-operations` moved "inspect files in this
+  repo" from a miss to a top-1 hit on the AGNT index.
+- The codec is most useful as a pre-model compression layer, not as a permission
+  system. It should recommend a compact tool surface; the host runtime should
+  still enforce safety, policy, and authorization.
 
 ## Design Principles
 

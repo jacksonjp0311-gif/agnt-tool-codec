@@ -93,9 +93,11 @@ class PythonCodecTests(unittest.TestCase):
         report = run_eval(codec, [
             {"message": "push changes to github", "expected_tools": ["github-plugin"]},
             {"message": "search AI news", "expected_tools": ["web-search"]},
+            {"message": "push changes to github", "expected_tools": ["git_tool"], "acceptable_tools": ["github-plugin"]},
         ])
-        self.assertEqual(report["summary"]["cases"], 2)
-        self.assertEqual(report["summary"]["top3"], 2)
+        self.assertEqual(report["summary"]["cases"], 3)
+        self.assertEqual(report["summary"]["top3"], 3)
+        self.assertEqual(report["summary"]["strictTop3"], 2)
         self.assertGreater(report["summary"]["tokensSaved"], 0)
         self.assertGreater(report["summary"]["savingsRate"], 0)
 
