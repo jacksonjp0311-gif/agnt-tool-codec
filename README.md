@@ -248,6 +248,39 @@ Demo eval: reports top-1/top-3/coverage metrics
 Default selection budget: 8,400 / 8,700 tokens
 ```
 
+## Measuring Context Bloat
+
+The eval runner reports estimated schema-token savings for every prompt:
+
+```bash
+agnt-tool-codec-eval --index src/agnt_tool_codec/data/demo-index.json --cases evals/demo-cases.json
+```
+
+Example output:
+
+```text
+cases=6 top1=1.000 top3=1.000 covered=1.000 savings=0.583 tokens=18000/43200
+OK | push these changes to github -> github, execute_python | saved=4800
+```
+
+The default estimate is intentionally simple:
+
+```text
+static tokens   = all tools x 1,200
+selected tokens = selected tools x 1,200
+tokens saved    = static - selected
+```
+
+That makes the benchmark dependency-free and easy to run anywhere. For production reporting, plug in your tokenizer of choice and compare the same two surfaces: all schemas versus codec-selected schemas.
+
+On the built-in demo index, the current demo cases save an estimated 58.3% of
+schema tokens while preserving 100% top-3 coverage. On the larger AGNT-oriented
+index, the same generic cases save an estimated 89.1% of schema tokens, but
+coverage drops to 50% because several expected demo tools do not exist under the
+same names. That is the point of the benchmark: it shows both savings and
+selection quality, so metadata gaps become visible instead of hidden behind a
+single token-savings number.
+
 ## Design Principles
 
 - Deterministic first: no model call is required to rank tools.

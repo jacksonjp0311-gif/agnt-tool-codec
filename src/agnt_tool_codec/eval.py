@@ -15,11 +15,14 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
     top1 = 0
     top3 = 0
     covered = 0
+    static_tokens = 0
+    selected_tokens = 0
 
     for case in cases:
         message = case["message"]
         expected = set(case.get("expected_tools", []))
         result = codec.select(message)
+        metadata = result["metadata"]
         selected = [item["tool"] for item in result["selected"]]
         hit_top1 = bool(selected and selected[0] in expected)
         hit_top3 = bool(expected & set(selected[:3]))
@@ -27,6 +30,8 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
         top1 += int(hit_top1)
         top3 += int(hit_top3)
         covered += int(hit_any)
+        static_tokens += metadata["staticTokenEstimate"]
+        selected_tokens += metadata["tokenEstimate"]
         results.append({
             "message": message,
             "expected": sorted(expected),
@@ -34,10 +39,14 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
             "top1": hit_top1,
             "top3": hit_top3,
             "covered": hit_any,
-            "savingsPercent": result["metadata"]["savingsPercent"],
+            "staticTokenEstimate": metadata["staticTokenEstimate"],
+            "selectedTokenEstimate": metadata["tokenEstimate"],
+            "tokensSaved": metadata["staticTokenEstimate"] - metadata["tokenEstimate"],
+            "savingsPercent": metadata["savingsPercent"],
         })
 
     total = len(cases)
+    tokens_saved = static_tokens - selected_tokens
     return {
         "summary": {
             "cases": total,
@@ -47,6 +56,12 @@ def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
             "top3Rate": round(top3 / total, 3) if total else 0,
             "covered": covered,
             "coveredRate": round(covered / total, 3) if total else 0,
+            "staticTokenEstimate": static_tokens,
+            "selectedTokenEstimate": selected_tokens,
+            "tokensSaved": tokens_saved,
+            "savingsRate": round(tokens_saved / static_tokens, 3) if static_tokens else 0,
+            "averageStaticTokens": round(static_tokens / total) if total else 0,
+            "averageSelectedTokens": round(selected_tokens / total) if total else 0,
         },
         "results": results,
     }
@@ -72,11 +87,16 @@ def main(argv: list[str] | None = None) -> int:
             f"cases={summary['cases']} "
             f"top1={summary['top1Rate']:.3f} "
             f"top3={summary['top3Rate']:.3f} "
-            f"covered={summary['coveredRate']:.3f}"
+            f"covered={summary['coveredRate']:.3f} "
+            f"savings={summary['savingsRate']:.3f} "
+            f"tokens={summary['selectedTokenEstimate']}/{summary['staticTokenEstimate']}"
         )
         for item in report["results"]:
             status = "OK" if item["covered"] else "MISS"
-            print(f"{status} | {item['message']} -> {', '.join(item['selected'][:3])}")
+            print(
+                f"{status} | {item['message']} -> {', '.join(item['selected'][:3])} "
+                f"| saved={item['tokensSaved']}"
+            )
     return 0
 
 

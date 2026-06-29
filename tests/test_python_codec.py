@@ -96,6 +96,8 @@ class PythonCodecTests(unittest.TestCase):
         ])
         self.assertEqual(report["summary"]["cases"], 2)
         self.assertEqual(report["summary"]["top3"], 2)
+        self.assertGreater(report["summary"]["tokensSaved"], 0)
+        self.assertGreater(report["summary"]["savingsRate"], 0)
 
 
 if __name__ == "__main__":
