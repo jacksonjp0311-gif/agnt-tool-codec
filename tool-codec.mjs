@@ -10,11 +10,10 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), '
 const index = JSON.parse(fs.readFileSync(path.join(__dirname, 'capability-index.json'), 'utf8'));
 
 const STOPWORDS = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','need','to','of','in','for','on','with','at','by','from','as','into','through','during','before','after','above','below','between','out','off','over','under','again','further','then','once','here','there','when','where','why','how','all','each','every','both','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','just','because','but','and','or','if','while','about','up','that','this','these','those','what','which','who','whom','its','our','also','want','like','make','know','time','come','back','much','show','tell','give','run']);
-const ALL_STOPWORDS = new Set([...STOPWORDS, 'check','status','health','monitor','system','find','search','create','build','validate','analyze','fix','detect','drift','active','broken','simulation','message','changes','news','plugins','tools','workflows','image','video','price','ratio','claim','phi','golden','synthesis','chemical','neural','network','classification','github','discord','bitcoin']);
 
 function encode(message) {
   const lower = message.toLowerCase();
-  const words = lower.split(/\s+/).filter(w => w.length > 2 && !ALL_STOPWORDS.has(w));
+  const words = lower.split(/\s+/).filter(w => w.length > 2 && !STOPWORDS.has(w));
   const rawWords = lower.split(/\s+/).filter(w => w.length > 2);
   
   let primaryIntent = 'general', intentScore = 0;
@@ -22,11 +21,26 @@ function encode(message) {
     const mc = keywords.filter(k => lower.includes(k)).length;
     if (mc > intentScore) { intentScore = mc; primaryIntent = intent; }
   }
+
+  const firstWord = rawWords[0];
+  for (const [intent, keywords] of Object.entries(config.intentPatterns)) {
+    if (keywords.includes(firstWord)) {
+      primaryIntent = intent;
+      break;
+    }
+  }
   
   let primaryDomain = 'general', domainScore = 0;
   for (const [domain, keywords] of Object.entries(config.domains)) {
     const mc = keywords.filter(k => lower.includes(k)).length;
     if (mc > domainScore) { domainScore = mc; primaryDomain = domain; }
+  }
+
+  if (
+    rawWords.some(w => ['plugin', 'plugins'].includes(w)) &&
+    ['create', 'deploy', 'configure'].includes(primaryIntent)
+  ) {
+    primaryDomain = 'development';
   }
   
   return { primaryIntent, primaryDomain, keywords: words, rawKeywords: rawWords, raw: message };
@@ -57,7 +71,7 @@ function score(intent, tools) {
       rationale.push('dom:' + intent.primaryDomain);
     }
     
-    if (tool.intents?.includes(intent.primaryIntent) && intent.primaryPrimaryIntent !== 'general') {
+    if (tool.intents?.includes(intent.primaryIntent) && intent.primaryIntent !== 'general') {
       score += 0.2;
       rationale.push('int:' + intent.primaryIntent);
     }

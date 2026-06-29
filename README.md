@@ -1,192 +1,224 @@
-# AGNT Tool Codec (v1.0.0)
+# AGNT Tool Codec
 
-**Intent-first dynamic tool selection for AGNT.**
+Intent-aware tool selection for agent runtimes.
 
-AGNT Tool Codec sits between a user message and tool-schema injection. Instead of shipping *dozens* of tool schemas into every model call, it scores your full tool ecosystem against the current message and injects only the most relevant handful.
+AGNT Tool Codec reads a user message, scores your available tools, and returns a small ranked shortlist. Instead of sending every tool schema to the model on every turn, your agent can send only the tools that are likely to matter.
 
-- **Massive context savings** (measured ~77K → ~8.7K tokens, ~89% reduction)
-- **Higher accuracy** by avoiding “tool overload”
-- **Drop-in integration** for AGNT’s orchestrator (`toolSelector.js`)
-
----
-
-## Why this exists
-
-Large tool registries create a paradox:
-
-- More tools = more capability
-- But more schemas in-context = less reasoning room, more distraction, worse tool choice
-
-Tool Codec addresses this by converting:
-
-> **User intent → ranked shortlist → token-budgeted tool injection**
-
----
-
-## What it does (pipeline)
-
-```
+```text
 User message
-   │
-   ▼
-ENCODE  →  SELECT  →  DECODE
-(intent/domain)   (score tools)   (apply token budget + fallbacks)
-   │
-   ▼
-5–8 relevant tools injected into the LLM call
+    |
+    v
++-----------+      +-------------+      +------------+
+|  Encode   | ---> |    Score    | ---> |  Select    |
+| intent    |      | tool fit    |      | top tools  |
++-----------+      +-------------+      +------------+
+    |                    |                    |
+    v                    v                    v
+intent/domain       confidence +         compact tool
+keywords            rationale            schema set
 ```
 
-**Encoder**
-- Tokenizes the message
-- Classifies a coarse **intent** (e.g. monitor / search / fix / build / analyze)
-- Classifies a coarse **domain** (e.g. system / dev / finance / comms / science)
+## Why This Exists
 
-**Selector**
-Scores each tool using weighted evidence such as:
-- keyword overlap
-- domain match
-- intent match
-- title/description affinity
-- optional history bias
+Modern agents accumulate tools quickly: web search, file access, code execution, memory, GitHub, databases, calendars, payments, internal APIs, and custom plugins. Passing all of those schemas into every model call is expensive and noisy.
 
-**Decoder**
-- Ranks tools by score
-- Enforces a **token budget** (default 8700)
-- Adds sensible **fallback tools**
+The codec gives the orchestration layer a simple preflight step:
 
----
-
-## Measured results (AGNT instance)
-
-| Metric | Static “load everything” | Codec shortlist |
-|---|---:|---:|
-| Tool schemas injected | 40+ | 5–8 |
-| Schema tokens | ~77,000 | ~8,700 |
-| Reasoning headroom | low | high |
-| Benchmark match rate | ~62% | **86.7% (13/15)** |
-
-Codec emits logs like:
-
-```
-[Codec] intent=analyze domain=system selected=8 savings=80%
+```python
+result = codec.select("push these changes to GitHub")
 ```
 
----
-
-## Repository layout
-
-| File | Purpose |
-|---|---|
-| `tool-codec.mjs` | Core engine (ESM) — encode/score/select/decode |
-| `tool-codec.js` | CJS-compatible build (used by some integrations) |
-| `codec-integration.js` | Orchestrator-facing integration shim |
-| `capability-index.json` | Tool capability manifest (generated) |
-| `config.json` | Weights, thresholds, token budget, fallbacks |
-| `build-index.js` | Build/refresh the capability index from your ecosystem |
-| `test-codec.js` | Benchmark harness |
-| `dashboard.html` | Self-contained evaluator dashboard |
-| `ARCHITECTURE.md` | Deeper design notes |
-
----
-
-## Quickstart (standalone)
-
-```bash
-# 1) Run the engine
-node tool-codec.mjs "check system health"
-
-# 2) Run the benchmark suite
-node test-codec.js
-
-# 3) Rebuild tool capability index (point at your plugins/tools folder)
-node build-index.js ../agnt-evo/backend/plugins/dev/
-```
-
----
-
-## Integrating into AGNT (recommended)
-
-There are two common ways to integrate:
-
-### A) Orchestrator patch (highest leverage)
-
-1. Copy this repo (or at least `codec-integration.js` + index/config files) into:
-   
-   `agnt-evo/backend/plugins/dev/agnt-tool-codec/`
-
-2. Patch AGNT orchestrator tool selection to call the codec **before** keyword/group matching.
-   
-   The proven integration pattern is:
-   - `createRequire(import.meta.url)`
-   - `require(".../codec-integration.js")`
-   - `try/catch` fail-open back to existing selection logic
-   - **merge** codec results with matched groups (additive, not destructive)
-
-3. Restart AGNT.
-
-You should see `[Codec] ...` lines in the server console on chat turns.
-
-### B) Run as an AGNT custom tool
-
-Codec can also be registered as a callable tool that returns ranked tool IDs for the orchestrator to consume. This is useful for experimentation, dashboards, and offline analysis.
-
----
-
-## Configuration
-
-Edit `config.json`:
+Result:
 
 ```json
 {
-  "maxTools": 8,
-  "minThreshold": 0.2,
-  "tokenBudget": 8700,
-  "domainBoost": 0.15,
-  "historyBoost": 0.1,
-  "fallbackTools": [
-    "execute-javascript-code",
-    "web-search",
-    "file-operations"
+  "selected": [
+    { "tool": "github-plugin", "score": 0.821 },
+    { "tool": "execute-javascript-code", "score": 0.15 }
+  ],
+  "metadata": {
+    "tokenEstimate": 8400,
+    "withinBudget": true,
+    "savingsPercent": 89
+  }
+}
+```
+
+## What It Does
+
+AGNT Tool Codec uses deterministic scoring. No model call is required.
+
+It looks at:
+
+| Signal | Purpose |
+| --- | --- |
+| Intent | Is the user trying to search, create, analyze, fix, deploy, monitor, or configure? |
+| Domain | Is the task about development, data, finance, communication, science, or system operations? |
+| Keywords | Do message words match tool keywords, titles, plugin names, or descriptions? |
+| Budget | How many tool schemas fit inside the configured token budget? |
+| Fallbacks | Which safety tools should still be available when relevant tools are sparse? |
+
+Default budget:
+
+```text
+7 tools x ~1,200 schema tokens = ~8,400 tokens
+```
+
+That keeps the selected set below the default `8,700` token budget while leaving far more context for reasoning and task data.
+
+## Repository Layout
+
+```text
+.
+|-- capability-index.json          # Tool capability manifest
+|-- config.json                    # Weights, patterns, budget, fallbacks
+|-- tool-codec.mjs                 # Small standalone Node runner
+|-- tool-codec.js                  # Node library and CLI
+|-- codec-integration.js           # AGNT-oriented integration module
+|-- src/agnt_tool_codec/           # Dependency-free Python package
+|-- spec/capability-index.schema.json
+|-- docs/scoring.md                # Language-neutral scoring contract
+|-- tests/test_python_codec.py
+`-- test-codec.js
+```
+
+## Before You Install
+
+Use the codec when your agent runtime has enough tools that schema noise becomes a real cost. If your agent only has three or four tools, you probably do not need this yet.
+
+The codec expects a capability index:
+
+```json
+{
+  "version": "1.1.0",
+  "tools": [
+    {
+      "name": "github-plugin",
+      "domain": "development",
+      "intents": ["deploy", "search"],
+      "keywords": ["github", "git", "push", "repository"],
+      "description": "Interact with GitHub repositories"
+    }
   ]
 }
 ```
 
-Key lesson from production: **keep stopwords minimal**. Over-aggressive stopword lists can erase the very domain terms you’re trying to detect.
+You can use the included `capability-index.json`, generate one from AGNT plugins, or produce your own from another framework.
 
----
+## Python
 
-## Dashboard
+Install locally:
 
-Open `dashboard.html` to:
-- type a message
-- see ranked tools + scores
-- compare “expected vs selected” for benchmark cards
-- inspect token estimates
+```bash
+python -m pip install -e .
+```
 
----
+Run the CLI:
 
-## Roadmap (next evolutions)
+```bash
+agnt-tool-codec-py --index capability-index.json --config config.json "create a new plugin for monitoring"
+```
 
-- Learned embeddings / semantic similarity (optional, pluggable)
-- Per-user tool priors + success-rate weighting
-- Automatic drift detection: tool churn vs selection stability
-- Formal evaluation harness + regression gating in CI
+Use as a library:
 
----
+```python
+from agnt_tool_codec import ToolCodec
 
-## Contributing
+codec = ToolCodec.from_files("capability-index.json", "config.json")
+result = codec.select("search for current AI news")
 
-PRs welcome, especially for:
-- better intent/domain classifiers
-- more robust index building across heterogeneous tool registries
-- evaluation datasets and scoring
+for tool in result["selected"]:
+    print(tool["tool"], tool["score"], tool["rationale"])
+```
 
----
+## Node
+
+Run the standalone selector:
+
+```bash
+node tool-codec.mjs "check system health"
+```
+
+Run the richer CLI:
+
+```bash
+node tool-codec.js --query "push changes to github"
+```
+
+Import from Node:
+
+```js
+import { runCodec } from "./tool-codec.js";
+
+const result = runCodec("validate the golden ratio claim");
+console.log(result.selected);
+```
+
+## AGNT Integration
+
+AGNT can call `codec-integration.js` before final tool injection:
+
+1. Read the latest user message.
+2. Score tools against `capability-index.json`.
+3. Keep the top ranked tools under the token budget.
+4. Merge with AGNT's required default/fallback tools.
+5. Send the compact schema set to the model.
+
+The codec is a selector, not an authority layer. Your orchestrator still decides which tools are allowed, which tools are safe, and which tools are required for the current surface.
+
+## Configuration
+
+```json
+{
+  "maxTools": 7,
+  "minThreshold": 0.15,
+  "tokenBudget": 8700,
+  "domainBoost": 0.15,
+  "historyBoost": 0.10,
+  "fallbackTools": [
+    "execute_javascript",
+    "web_search",
+    "file_operations"
+  ]
+}
+```
+
+Tune the codec by changing:
+
+| Field | Effect |
+| --- | --- |
+| `maxTools` | Hard cap on selected tools |
+| `minThreshold` | Minimum score required for inclusion |
+| `tokenBudget` | Target schema-token budget |
+| `intentPatterns` | Words that identify user intent |
+| `domains` | Words that identify task domain |
+| `fallbackTools` | Tools returned as fallback suggestions |
+
+## Validation
+
+Run all local checks:
+
+```bash
+npm test
+python -m unittest discover -s tests -v
+```
+
+Current local baseline:
+
+```text
+Node smoke suite: 22/22 passing
+Python unit suite: 3/3 passing
+Default selection budget: 8,400 / 8,700 tokens
+```
+
+## Design Principles
+
+- Deterministic first: no model call is required to rank tools.
+- Portable core: the scoring contract is independent of AGNT.
+- Runtime-owned safety: the codec recommends tools; the host runtime enforces permissions.
+- Small context: selected tools should stay under budget by default.
+- Inspectable output: every selected tool includes a score and rationale.
 
 ## License
 
-Apache-2.0.
-
----
-
-Built for the AGNT ecosystem (2026-06-28).
+Apache-2.0. See `LICENSE`.

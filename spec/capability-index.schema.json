@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnt.dev/schemas/tool-codec/capability-index.schema.json",
+  "title": "Tool Codec Capability Index",
+  "type": "object",
+  "required": ["version", "tools"],
+  "properties": {
+    "version": { "type": "string" },
+    "generated": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/tool" }
+    }
+  },
+  "$defs": {
+    "tool": {
+      "type": "object",
+      "required": ["name", "keywords"],
+      "properties": {
+        "name": { "type": "string" },
+        "plugin": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "domain": { "type": "string" },
+        "intents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

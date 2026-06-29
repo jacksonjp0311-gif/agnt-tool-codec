@@ -54,6 +54,14 @@ function encodeIntent(message, config) {
       primaryIntent = intent;
     }
   }
+
+  const firstWord = words[0];
+  for (const [intent, keywords] of Object.entries(config.intentPatterns || {})) {
+    if (keywords.includes(firstWord)) {
+      primaryIntent = intent;
+      break;
+    }
+  }
   
   // Detect domain
   let primaryDomain = 'general';
@@ -69,6 +77,13 @@ function encodeIntent(message, config) {
   // Extract keywords (remove stopwords)
   const stopwords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'because', 'but', 'and', 'or', 'if', 'while', 'about', 'up', 'that', 'this', 'these', 'those', 'what', 'which', 'who', 'whom', 'its', 'our', 'out', 'off', 'also', 'want', 'like', 'make', 'know', 'time', 'very', 'when', 'come', 'back', 'much']);
   const keywords = words.filter(w => !stopwords.has(w));
+
+  if (
+    words.some(w => ['plugin', 'plugins'].includes(w)) &&
+    ['create', 'deploy', 'configure'].includes(primaryIntent)
+  ) {
+    primaryDomain = 'development';
+  }
   
   // Build intent vector (sparse representation)
   const vector = {};
@@ -81,6 +96,7 @@ function encodeIntent(message, config) {
     primaryDomain,
     keywords,
     vector,
+    rawKeywords: words,
     raw: message
   };
 }
@@ -106,9 +122,14 @@ function selectTools(intent, tools, config, history = []) {
       score += (overlap.length / Math.max(intentKeywords.length, 1)) * 0.5;
       overlap.slice(0, 3).forEach(k => rationale.push(`keyword:${k}`));
     }
+
+    const rawOverlap = (intent.rawKeywords || []).filter(k => toolKeywords.includes(k));
+    if (rawOverlap.length > overlap.length) {
+      score += Math.min((rawOverlap.length - overlap.length) * 0.08, 0.3);
+    }
     
     // 2. Domain match boost
-    if (tool.domain === intent.primaryDomain) {
+    if (tool.domain === intent.primaryDomain && intent.primaryDomain !== 'general') {
       score += config.domainBoost || 0.15;
       rationale.push(`domain:${intent.primaryDomain}`);
     }
@@ -128,6 +149,15 @@ function selectTools(intent, tools, config, history = []) {
         descOverlap.slice(0, 2).forEach(k => rationale.push(`desc:${k}`));
       }
     }
+
+    if (tool.title) {
+      const titleWords = tool.title.toLowerCase().split(/[\s\-_,.()[\]{}]+/);
+      const titleOverlap = (intent.rawKeywords || []).filter(k => titleWords.includes(k));
+      if (titleOverlap.length > 0) {
+        score += 0.1 * titleOverlap.length;
+        rationale.push(`title:${titleOverlap[0]}`);
+      }
+    }
     
     // 5. History bias
     const recentUse = history.slice(-config.historyWindow || 20).filter(h => h.tool === tool.name);
@@ -145,7 +175,13 @@ function selectTools(intent, tools, config, history = []) {
     score = Math.min(score, 1.0);
     
     if (score >= (config.minThreshold || 0.40)) {
-      scores.push({ tool: tool.name, score: parseFloat(score.toFixed(3)), rationale: rationale.slice(0, 4), category: tool.category || 'general' });
+      scores.push({
+        tool: tool.name,
+        score: parseFloat(score.toFixed(3)),
+        rationale: rationale.slice(0, 4),
+        category: tool.category || 'general',
+        domain: tool.domain || 'general'
+      });
     }
   }
   
@@ -167,7 +203,9 @@ function decodeSelection(selected, config) {
     selected: selected.map(s => ({
       tool: s.tool,
       confidence: s.score,
-      rationale: s.rationale.join(', ')
+      rationale: s.rationale.join(', '),
+      category: s.category,
+      domain: s.domain
     })),
     metadata: {
       totalSelected: selected.length,

@@ -1,0 +1,19 @@
+{
+  "name": "agnt-tool-codec",
+  "version": "1.1.0",
+  "description": "Intent-based dynamic tool selection for AI agent orchestration.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "./tool-codec.js",
+  "exports": {
+    ".": "./tool-codec.js",
+    "./integration": "./codec-integration.js"
+  },
+  "bin": {
+    "agnt-tool-codec": "./tool-codec.mjs"
+  },
+  "scripts": {
+    "test": "node tool-codec.mjs && node tool-codec.js --test && node test-codec.js",
+    "query": "node tool-codec.mjs"
+  }
+}

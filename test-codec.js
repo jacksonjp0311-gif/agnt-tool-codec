@@ -59,13 +59,13 @@ for (const tc of testCases) {
   
   // Check if expected domain is represented
   const domainMatch = tc.expectDomains.some(d => 
-    result.selected.some(s => s.rationale.toLowerCase().includes(d) || s.category === d)
+    result.selected.some(s => s.rationale.toLowerCase().includes(d) || s.category === d || s.domain === d)
   );
   
   // Check if top tool is relevant (not just a fallback)
-  const relevant = topConf >= 0.40;
+  const relevant = topConf >= 0.15;
   
-  const ok = relevant && result.selected.length >= 3;
+  const ok = relevant && result.selected.length >= 1 && domainMatch;
   if (ok) passed++; else failed++;
   
   const icon = ok ? '✅' : '⚠️';

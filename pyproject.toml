@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agnt-tool-codec"
+version = "1.1.0"
+description = "Intent-based dynamic tool selection for AI agent orchestration."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "James Paul Jackson" }
+]
+keywords = ["agents", "tools", "tool-selection", "orchestration", "llm"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = []
+
+[project.scripts]
+agnt-tool-codec-py = "agnt_tool_codec.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

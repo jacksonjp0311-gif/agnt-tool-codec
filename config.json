@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "maxTools": 8,
-  "minThreshold": 0.40,
+  "maxTools": 7,
+  "minThreshold": 0.15,
   "tokenBudget": 8700,
   "domainBoost": 0.15,
   "historyBoost": 0.10,
