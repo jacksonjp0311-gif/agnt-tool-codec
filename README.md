@@ -76,7 +76,9 @@ That keeps the selected set below the default `8,700` token budget while leaving
 |       `-- data/demo-index.json      # Built-in try-it-now capability index
 |-- docs/
 |   |-- scoring.md                    # Language-neutral scoring contract
-|   `-- assets/codec-flow.svg         # README flow graphic
+|   `-- assets/                       # README graphics
+|       |-- codec-flow.svg            # Flow graphic
+|       `-- benchmark-findings.svg    # Benchmark summary graphic
 |-- spec/
 |   `-- capability-index.schema.json  # Capability index schema
 |-- evals/
@@ -258,14 +260,23 @@ Current local baseline:
 
 ```text
 Node smoke suite: 22/22 passing
-Python unit suite: 8/8 passing
+Python unit suite: 9/9 passing
 Demo eval: reports top-1/top-3/coverage metrics
 Default selection budget: 8,400 / 8,700 tokens
 ```
 
 ## Measuring Context Bloat
 
-The eval runner reports estimated schema-token savings for every prompt:
+The eval runner reports estimated schema-token savings for every prompt. The
+graphic below summarizes the larger AGNT-oriented index run:
+
+![AGNT Tool Codec benchmark findings](docs/assets/benchmark-findings.svg)
+
+```bash
+agnt-tool-codec-eval --index capability-index.json --cases evals/demo-cases.json
+```
+
+You can also run the smaller built-in demo index:
 
 ```bash
 agnt-tool-codec-eval --index src/agnt_tool_codec/data/demo-index.json --cases evals/demo-cases.json
