@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 from .core import ToolCodec
+from .validation import validate_index
 
 
 def run_eval(codec: ToolCodec, cases: list[dict[str, Any]]) -> dict[str, Any]:
@@ -94,16 +96,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", default="config.json", help="Config JSON path.")
     parser.add_argument("--cases", default="evals/demo-cases.json", help="Eval cases JSON path.")
     parser.add_argument("--json", action="store_true", help="Print full JSON output.")
+    parser.add_argument("--skip-index-validation", action="store_true", help="Do not validate the capability index before running.")
+    parser.add_argument("--min-top3", type=float, default=0.0, help="Fail if top-3 coverage falls below this rate.")
+    parser.add_argument("--min-covered", type=float, default=0.0, help="Fail if any-position coverage falls below this rate.")
+    parser.add_argument("--min-savings", type=float, default=0.0, help="Fail if estimated savings falls below this rate.")
+    parser.add_argument("--min-strict", type=float, default=0.0, help="Fail if strict exact-name coverage falls below this rate.")
     args = parser.parse_args(argv)
 
-    codec = ToolCodec.from_files(args.index, args.config if Path(args.config).exists() else None)
+    index = json.loads(Path(args.index).read_text(encoding="utf-8"))
+    if not args.skip_index_validation:
+        errors = validate_index(index)
+        if errors:
+            print("invalid capability index:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 2
+
+    config = json.loads(Path(args.config).read_text(encoding="utf-8")) if Path(args.config).exists() else {}
+    codec = ToolCodec(tools=list(index.get("tools", [])), config=config)
     cases = json.loads(Path(args.cases).read_text(encoding="utf-8"))["cases"]
     report = run_eval(codec, cases)
+    summary = report["summary"]
 
     if args.json:
         print(json.dumps(report, indent=2))
     else:
-        summary = report["summary"]
         print(
             f"cases={summary['cases']} "
             f"top1={summary['top1Rate']:.3f} "
@@ -119,6 +136,19 @@ def main(argv: list[str] | None = None) -> int:
                 f"{status} | {item['message']} -> {', '.join(item['selected'][:3])} "
                 f"| saved={item['tokensSaved']}"
             )
+
+    failures = []
+    if summary["top3Rate"] < args.min_top3:
+        failures.append(f"top3 {summary['top3Rate']:.3f} < {args.min_top3:.3f}")
+    if summary["coveredRate"] < args.min_covered:
+        failures.append(f"covered {summary['coveredRate']:.3f} < {args.min_covered:.3f}")
+    if summary["savingsRate"] < args.min_savings:
+        failures.append(f"savings {summary['savingsRate']:.3f} < {args.min_savings:.3f}")
+    if summary["strictCoveredRate"] < args.min_strict:
+        failures.append(f"strict {summary['strictCoveredRate']:.3f} < {args.min_strict:.3f}")
+    if failures:
+        print("benchmark gate failed: " + "; ".join(failures), file=sys.stderr)
+        return 1
     return 0
 
 

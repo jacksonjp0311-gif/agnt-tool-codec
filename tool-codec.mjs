@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AGNT Tool Codec v1.0.0 — Intent-based dynamic tool selection
+// AGNT Tool Codec v1.1.0 - Intent-based dynamic tool selection
 // Usage: node tool-codec.mjs "check system health"
 
 import fs from 'fs';
@@ -106,10 +106,25 @@ function score(intent, tools) {
 }
 
 function decode(selected) {
+  const perTool = config.toolTokenEstimate || 1200;
+  const tokenEstimate = selected.length * perTool;
+  const staticTokenEstimate = (index.tools || []).length * perTool;
+  const availableNames = new Set((index.tools || []).map(t => t.name).filter(Boolean));
+  const fallbacks = (config.fallbackTools || ['execute-javascript-code','web-search','file-operations'])
+    .filter(f => !selected.find(s => s.tool === f))
+    .filter(f => availableNames.size === 0 || availableNames.has(f))
+    .slice(0, 3);
   return {
     selected: selected.map(s => ({ tool: s.tool, confidence: s.score, rationale: s.rationale.join(', '), domain: s.domain })),
-    metadata: { totalSelected: selected.length, tokenEstimate: selected.length * 1200, budget: config.tokenBudget || 8700, withinBudget: selected.length <= 7 },
-    fallbacks: (config.fallbackTools || ['execute-javascript-code','web-search','file-operations']).filter(f => !selected.find(s => s.tool === f)).slice(0, 3)
+    metadata: {
+      totalSelected: selected.length,
+      tokenEstimate,
+      staticTokenEstimate,
+      budget: config.tokenBudget || 8700,
+      withinBudget: tokenEstimate <= (config.tokenBudget || 8700),
+      savingsPercent: staticTokenEstimate ? Math.round((1 - tokenEstimate / staticTokenEstimate) * 100) : 0
+    },
+    fallbacks
   };
 }
 

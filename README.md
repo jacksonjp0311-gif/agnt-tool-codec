@@ -73,6 +73,7 @@ That keeps the selected set below the default `8,700` token budget while leaving
 |       |-- adapters.py               # OpenAI/callable adapter helpers
 |       |-- cli.py                    # agnt-tool-codec-py
 |       |-- eval.py                   # agnt-tool-codec-eval
+|       |-- validation.py             # Capability index validation helpers
 |       `-- data/demo-index.json      # Built-in try-it-now capability index
 |-- docs/
 |   |-- scoring.md                    # Language-neutral scoring contract
@@ -82,7 +83,8 @@ That keeps the selected set below the default `8,700` token budget while leaving
 |-- spec/
 |   `-- capability-index.schema.json  # Capability index schema
 |-- evals/
-|   `-- demo-cases.json               # Demo eval prompts and expected tools
+|   |-- demo-cases.json               # Small demo eval prompts
+|   `-- runtime-cases.json            # Broader AGNT-oriented runtime benchmark
 |-- examples/
 |   |-- python_cli.py                 # Basic Python package usage
 |   |-- openai_adapter.py             # OpenAI-style tool filtering example
@@ -228,9 +230,9 @@ The codec is a selector, not an authority layer. Your orchestrator still decides
   "domainBoost": 0.15,
   "historyBoost": 0.10,
   "fallbackTools": [
-    "execute_javascript",
-    "web_search",
-    "file_operations"
+    "execute-javascript-code",
+    "web-search",
+    "file-operations"
   ]
 }
 ```
@@ -244,7 +246,7 @@ Tune the codec by changing:
 | `tokenBudget` | Target schema-token budget |
 | `intentPatterns` | Words that identify user intent |
 | `domains` | Words that identify task domain |
-| `fallbackTools` | Tools returned as fallback suggestions |
+| `fallbackTools` | Runtime-owned fallback tools, returned only when present in the active index |
 
 ## Validation
 
@@ -254,14 +256,16 @@ Run all local checks:
 npm test
 python -m unittest discover -s tests -v
 agnt-tool-codec-eval --cases evals/demo-cases.json
+agnt-tool-codec-eval --index capability-index.json --cases evals/runtime-cases.json --min-top3 1.0 --min-covered 1.0 --min-savings 0.85
 ```
 
 Current local baseline:
 
 ```text
 Node smoke suite: 22/22 passing
-Python unit suite: 9/9 passing
-Demo eval: reports top-1/top-3/coverage metrics
+Python unit suite: 11/11 passing
+Demo eval: cases=6 top1=1.000 top3=1.000 covered=1.000 savings=0.891
+Runtime eval: cases=35 top1=0.943 top3=1.000 covered=1.000 savings=0.911
 Default selection budget: 8,400 / 8,700 tokens
 ```
 
@@ -306,6 +310,15 @@ tokens while preserving 100% top-3 coverage when runtime-equivalent tools are
 allowed. Strict exact-name coverage is 66.7%, which is useful signal: some
 runtimes have equivalent tools with different names.
 
+The broader AGNT-oriented runtime suite currently covers 35 prompts across web,
+data, files, GitHub, deployment, communication, finance, science, media, and
+workflow operations. It reports 94.3% top-1 coverage, 100% top-3 coverage, and
+91.1% estimated schema-token savings:
+
+```text
+cases=35 top1=0.943 top3=1.000 covered=1.000 strict=1.000 savings=0.911 tokens=240000/2688000
+```
+
 That is the point of the benchmark: it shows both savings and selection quality,
 so metadata gaps become visible instead of hidden behind a single token-savings
 number.
@@ -315,6 +328,8 @@ number.
 - Context bloat is measurable. On the full AGNT-oriented index, the benchmark
   compares 460,800 estimated static schema tokens against 50,400 selected schema
   tokens across six prompts.
+- Benchmark breadth matters. The 35-case runtime suite is now the stronger
+  signal for regressions because it exercises many more agent task families.
 - Token savings alone are not enough. A selector can save 89% of schema tokens
   and still be wrong if the capability index is thin or mismatched.
 - Exact-name evals and runtime-equivalent evals answer different questions.
@@ -324,6 +339,9 @@ number.
 - Metadata quality is the ceiling. Adding `files`, `repo`, `repository`,
   `source`, and `inspect` to `file-operations` moved "inspect files in this
   repo" from a miss to a top-1 hit on the AGNT index.
+- Fallbacks must be real runtime tools. The codec now filters configured
+  fallback names against the active capability index instead of returning
+  placeholders that cannot be invoked.
 - The codec is most useful as a pre-model compression layer, not as a permission
   system. It should recommend a compact tool surface; the host runtime should
   still enforce safety, policy, and authorization.

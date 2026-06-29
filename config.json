@@ -8,9 +8,9 @@
   "historyWindow": 20,
   "logSelections": true,
   "fallbackTools": [
-    "execute_javascript",
-    "web_search",
-    "file_operations"
+    "execute-javascript-code",
+    "web-search",
+    "file-operations"
   ],
   "intentPatterns": {
     "monitor": ["check", "status", "health", "monitor", "watch", "track", "observe", "survey", "inspect", "diagnose"],

@@ -92,24 +92,30 @@ Every codec selection is logged to `selection-log.json` for analysis and dashboa
 
 ## Benchmarks
 
-### Test Suite (20 cases)
+### Runtime Benchmark (35 cases)
 
-| Category | Queries | Pass Rate |
-|----------|---------|-----------|
-| Monitor (system health, credits, drift) | 5 | 80%+ |
-| Create (CNN, plugin, monitoring) | 4 | 75%+ |
-| Search (news, plugins, github, price) | 4 | 75%+ |
-| Analyze (build coverage, validation) | 4 | 75%+ |
-| Fix (broken workflows, errors) | 3 | 67%+ |
+| Metric | Current baseline |
+|--------|------------------|
+| Cases | 35 |
+| Top-1 coverage | 94.3% |
+| Top-3 coverage | 100% |
+| Any-position coverage | 100% |
+| Estimated schema-token savings | 91.1% |
+
+Run it with:
+
+```bash
+agnt-tool-codec-eval --index capability-index.json --cases evals/runtime-cases.json --min-top3 1.0 --min-covered 1.0 --min-savings 0.85
+```
 
 ### Token Savings
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
-| Tools in context | 40+ | 5-8 | 80% fewer |
-| Schema tokens | ~77,000 | ~8,700 | 89% reduction |
+| Tools in context | 64 | 2-7 | Up to 89% fewer |
+| Schema tokens | 2,688,000 | 240,000 | 91.1% reduction |
 | Reasoning context | 23% | 78% | 3.4x more room |
-| Selection accuracy | ~62% | ~85%+ | 37% improvement |
+| Top-3 coverage | n/a | 100% | benchmark-gated |
 
 ## How to Extend
 

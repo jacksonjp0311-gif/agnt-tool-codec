@@ -219,7 +219,11 @@ def select_tools(
     intent = encode_intent(message, cfg)
     ranked = score_tools(intent, tool_list, cfg)[: int(cfg["maxTools"])]
     selected_names = {item["tool"] for item in ranked}
-    fallbacks = [name for name in cfg["fallbackTools"] if name not in selected_names]
+    tool_names = {_name(tool) for tool in tool_list if _name(tool)}
+    fallbacks = [
+        name for name in cfg["fallbackTools"]
+        if name not in selected_names and name in tool_names
+    ]
     per_tool = int(cfg.get("toolTokenEstimate", 1200))
     static_tokens = len(tool_list) * per_tool
     dynamic_tokens = len(ranked) * per_tool

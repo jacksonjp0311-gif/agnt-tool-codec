@@ -1,5 +1,5 @@
 /**
- * AGNT Tool Codec v1.0.0
+ * AGNT Tool Codec v1.1.0
  * 
  * Intent-based dynamic tool selection engine.
  * Encodes user intent → Scores all tools → Selects optimal subset → Decodes to schema.
@@ -26,7 +26,16 @@ const LOG_PATH = path.join(__dirname, 'selection-log.json');
 
 function loadConfig() {
   try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); }
-  catch { return { maxTools: 8, minThreshold: 0.40, tokenBudget: 8700, domainBoost: 0.15, historyBoost: 0.10, fallbackTools: ["execute_javascript", "web_search"] }; }
+  catch {
+    return {
+      maxTools: 7,
+      minThreshold: 0.15,
+      tokenBudget: 8700,
+      domainBoost: 0.15,
+      historyBoost: 0.10,
+      fallbackTools: ["execute-javascript-code", "web-search", "file-operations"]
+    };
+  }
 }
 
 function loadIndex() {
@@ -160,7 +169,7 @@ function selectTools(intent, tools, config, history = []) {
     }
     
     // 5. History bias
-    const recentUse = history.slice(-config.historyWindow || 20).filter(h => h.tool === tool.name);
+    const recentUse = history.slice(-(config.historyWindow || 20)).filter(h => h.tool === tool.name);
     if (recentUse.length > 0) {
       const successRate = recentUse.filter(h => h.success).length / recentUse.length;
       score += successRate * (config.historyBoost || 0.10);
@@ -198,7 +207,9 @@ function selectTools(intent, tools, config, history = []) {
  * Decode selected tools into injection format.
  * Applies token budget and adds fallback tools.
  */
-function decodeSelection(selected, config) {
+function decodeSelection(selected, config, availableTools = []) {
+  const availableNames = new Set(availableTools.map(t => t.name).filter(Boolean));
+  const perTool = config.toolTokenEstimate || 1200;
   const result = {
     selected: selected.map(s => ({
       tool: s.tool,
@@ -209,21 +220,22 @@ function decodeSelection(selected, config) {
     })),
     metadata: {
       totalSelected: selected.length,
-      tokenEstimate: selected.length * 1200, // ~1.2K tokens per schema
+      tokenEstimate: selected.length * perTool,
       budget: config.tokenBudget || 8700,
-      withinBudget: (selected.length * 1200) <= (config.tokenBudget || 8700)
+      withinBudget: (selected.length * perTool) <= (config.tokenBudget || 8700)
     }
   };
   
   // Add fallbacks if room
-  const fallbackRoom = Math.floor(((config.tokenBudget || 8700) - result.metadata.tokenEstimate) / 1200);
+  const fallbackRoom = Math.floor(((config.tokenBudget || 8700) - result.metadata.tokenEstimate) / perTool);
   if (fallbackRoom > 0 && config.fallbackTools) {
     const fallbacks = config.fallbackTools
       .filter(f => !selected.find(s => s.tool === f))
+      .filter(f => availableNames.size === 0 || availableNames.has(f))
       .slice(0, fallbackRoom);
     result.fallbacks = fallbacks;
     result.metadata.totalSelected += fallbacks.length;
-    result.metadata.tokenEstimate += fallbacks.length * 1200;
+    result.metadata.tokenEstimate += fallbacks.length * perTool;
   }
   
   return result;
@@ -235,9 +247,9 @@ function buildFallbackIndex() {
   // Built-in tool definitions for when no external index exists
   return {
     tools: [
-      { name: 'execute_javascript', intents: ['analyze', 'create', 'fix'], domain: 'development', keywords: ['code', 'run', 'script', 'javascript', 'calculate', 'process', 'transform'], description: 'Execute custom JavaScript code for advanced logic and data processing' },
-      { name: 'web_search', intents: ['search', 'analyze'], domain: 'data', keywords: ['search', 'find', 'lookup', 'google', 'research', 'information', 'web'], description: 'Search the web for current information' },
-      { name: 'file_operations', intents: ['create', 'search', 'configure'], domain: 'system', keywords: ['file', 'read', 'write', 'directory', 'folder', 'move', 'copy', 'delete'], description: 'Read, write, and manage file system operations' },
+      { name: 'execute-javascript-code', intents: ['analyze', 'create', 'fix'], domain: 'development', keywords: ['code', 'run', 'script', 'javascript', 'calculate', 'process', 'transform'], description: 'Execute custom JavaScript code for advanced logic and data processing' },
+      { name: 'web-search', intents: ['search', 'analyze'], domain: 'data', keywords: ['search', 'find', 'lookup', 'google', 'research', 'information', 'web'], description: 'Search the web for current information' },
+      { name: 'file-operations', intents: ['create', 'search', 'configure'], domain: 'development', keywords: ['file', 'read', 'write', 'directory', 'folder', 'repo', 'repository', 'inspect', 'move', 'copy', 'delete'], description: 'Read, write, and manage file system operations' },
       { name: 'database_operation', intents: ['search', 'analyze', 'configure'], domain: 'data', keywords: ['database', 'query', 'select', 'insert', 'update', 'sql', 'table'], description: 'Query and manipulate database tables' },
       { name: 'web_scrape', intents: ['search', 'analyze'], domain: 'data', keywords: ['scrape', 'extract', 'webpage', 'content', 'html', 'website', 'url'], description: 'Extract content from web pages' },
       { name: 'scm-check-health', intents: ['monitor'], domain: 'system', keywords: ['health', 'coherence', 'monitor', 'system', 'status', 'check'], description: 'Autonomous ecosystem health monitor with coherence scoring' },
@@ -384,7 +396,7 @@ function runCodec(message, options = {}) {
   const selected = selectTools(intent, index.tools || [], config, history);
   
   // Decode
-  const result = decodeSelection(selected, config);
+  const result = decodeSelection(selected, config, index.tools || []);
   
   // Log
   if (config.logSelections !== false) {
@@ -400,7 +412,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   
   if (args.includes('--help')) {
-    console.log('AGNT Tool Codec v1.0.0');
+    console.log('AGNT Tool Codec v1.1.0');
     console.log('');
     console.log('Usage:');
     console.log('  node tool-codec.js --query "check system health"');
@@ -418,10 +430,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       { q: 'monitor credit usage', expect: 'credit-burn-guard' },
       { q: 'build a CNN model', expect: 'neuralforge_create' },
       { q: 'validate phi selection claim', expect: 'pce-v3.5-validator' },
-      { q: 'analyze test results', expect: 'execute_javascript' },
+      { q: 'analyze test results', expect: 'execute-javascript-code' },
       { q: 'find dead workflows', expect: 'self-healing' },
       { q: 'compare plugin builds', expect: 'plugin-health' },
-      { q: 'search for AI news', expect: 'web_search' },
+      { q: 'search for AI news', expect: 'web-search' },
       { q: 'detect drift in system state', expect: 'ecosystem-drift' },
       { q: 'send a github PR', expect: 'github-plugin' },
     ];

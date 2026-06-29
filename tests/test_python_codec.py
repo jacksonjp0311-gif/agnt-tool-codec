@@ -9,6 +9,7 @@ from agnt_tool_codec import (
     filter_dict_tools,
     filter_openai_tools,
     select_tools,
+    validate_index,
 )
 from agnt_tool_codec.eval import run_eval
 
@@ -66,6 +67,11 @@ class PythonCodecTests(unittest.TestCase):
         self.assertEqual(result["metadata"]["staticTokenEstimate"], len(TOOLS) * 1200)
         self.assertEqual(result["selected"][0]["tool"], "github-plugin")
 
+    def test_filters_unknown_fallbacks(self):
+        result = select_tools("push changes to github", TOOLS, {"fallbackTools": ["missing-tool", "web-search"]})
+        self.assertNotIn("missing-tool", result["fallbacks"])
+        self.assertIn("web-search", result["fallbacks"])
+
     def test_openai_adapter_filters_and_orders_tools(self):
         openai_tools = [
             {"type": "function", "function": {"name": "web_search", "description": "Search web news."}},
@@ -113,6 +119,12 @@ class PythonCodecTests(unittest.TestCase):
         self.assertEqual(report["summary"]["strictTop3"], 2)
         self.assertGreater(report["summary"]["tokensSaved"], 0)
         self.assertGreater(report["summary"]["savingsRate"], 0)
+
+    def test_validates_capability_indexes(self):
+        errors = validate_index({"version": "1.0", "tools": TOOLS})
+        self.assertEqual(errors, [])
+        errors = validate_index({"version": "1.0", "tools": [{"name": "bad", "keywords": []}]})
+        self.assertTrue(any("keywords" in error for error in errors))
 
 
 if __name__ == "__main__":

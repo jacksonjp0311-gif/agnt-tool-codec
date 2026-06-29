@@ -1,5 +1,5 @@
 /**
- * AGNT Codec Integration v1.0.0
+ * AGNT Codec Integration v1.1.0
  * 
  * Drop-in module that injects intent-based tool scoring into the 
  * toolSelector.js pipeline. Call codecSelectTools() before the existing

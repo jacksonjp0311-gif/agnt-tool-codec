@@ -23,6 +23,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Python tests
         run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Benchmark gate
+        run: |
+          PYTHONPATH=src python -m agnt_tool_codec.eval --index capability-index.json --cases evals/demo-cases.json --min-top3 1.0 --min-covered 1.0 --min-savings 0.85
+          PYTHONPATH=src python -m agnt_tool_codec.eval --index capability-index.json --cases evals/runtime-cases.json --min-top3 1.0 --min-covered 1.0 --min-savings 0.85
       - name: Node tests
         run: npm test
       - name: Build Python distributions

@@ -17,6 +17,7 @@ from .adapters import (
     filter_dict_tools,
     filter_openai_tools,
 )
+from .validation import validate_index, validate_index_file
 
 __all__ = [
     "DEFAULT_CONFIG",
@@ -32,4 +33,6 @@ __all__ = [
     "load_json",
     "score_tools",
     "select_tools",
+    "validate_index",
+    "validate_index_file",
 ]

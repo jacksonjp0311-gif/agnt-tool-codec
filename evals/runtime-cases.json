@@ -1,0 +1,145 @@
+{
+  "description": "Broader AGNT-oriented runtime benchmark covering common agent task families.",
+  "cases": [
+    {
+      "message": "search the web for current AI news",
+      "expected_tools": ["web-search"]
+    },
+    {
+      "message": "scrape this webpage into markdown",
+      "expected_tools": ["web-scrape", "firecrawl-plugin"]
+    },
+    {
+      "message": "crawl this site and extract content",
+      "expected_tools": ["firecrawl-plugin", "ice-crawler"]
+    },
+    {
+      "message": "query customer records from the database",
+      "expected_tools": ["query-data"]
+    },
+    {
+      "message": "read rows from a google spreadsheet",
+      "expected_tools": ["google-sheets-plugin"]
+    },
+    {
+      "message": "upload the report to google drive",
+      "expected_tools": ["google-drive-plugin"]
+    },
+    {
+      "message": "create a slide deck for benchmark results",
+      "expected_tools": ["google-slides-plugin"]
+    },
+    {
+      "message": "push these changes to github",
+      "expected_tools": ["github-plugin"]
+    },
+    {
+      "message": "deploy this service to cloud infrastructure",
+      "expected_tools": ["atlas-cloud"]
+    },
+    {
+      "message": "debug this failing python test",
+      "expected_tools": ["execute-javascript-code", "file-operations"]
+    },
+    {
+      "message": "inspect files in this repo",
+      "expected_tools": ["file-operations"]
+    },
+    {
+      "message": "create a new monitoring plugin",
+      "expected_tools": ["agnt-tools"]
+    },
+    {
+      "message": "list active workflows and status",
+      "expected_tools": ["agnt-workflows", "ecosystem-status"]
+    },
+    {
+      "message": "show ecosystem telemetry dashboard",
+      "expected_tools": ["ecosystem-status"]
+    },
+    {
+      "message": "detect drift between environments",
+      "expected_tools": ["cold-storage-sync", "emergence-detect"]
+    },
+    {
+      "message": "sync evolution state to cold storage",
+      "expected_tools": ["evolution-sync-tool", "cold-storage-sync"]
+    },
+    {
+      "message": "monitor bitcoin price and fees",
+      "expected_tools": ["get-bitcoin-price", "bankr-fee-monitor"]
+    },
+    {
+      "message": "get ethereum price right now",
+      "expected_tools": ["get-ethereum-price"]
+    },
+    {
+      "message": "send the team a slack update",
+      "expected_tools": ["gmail-plugin", "telegram-api", "discord-api"]
+    },
+    {
+      "message": "send a discord message to the channel",
+      "expected_tools": ["discord-api"]
+    },
+    {
+      "message": "email the latest report",
+      "expected_tools": ["gmail-plugin"]
+    },
+    {
+      "message": "send a telegram alert",
+      "expected_tools": ["telegram-api"]
+    },
+    {
+      "message": "validate the golden ratio claim",
+      "expected_tools": ["pce-v3.5-validator", "fibonacci-sequence"]
+    },
+    {
+      "message": "generate fibonacci sequence values",
+      "expected_tools": ["fibonacci-sequence"]
+    },
+    {
+      "message": "design a chemical synthesis route",
+      "expected_tools": ["chemiframe-synthesize"]
+    },
+    {
+      "message": "create a neural network model",
+      "expected_tools": ["neuralforge-create"]
+    },
+    {
+      "message": "train the neural network with epochs",
+      "expected_tools": ["neuralforge-train"]
+    },
+    {
+      "message": "evaluate neural network accuracy",
+      "expected_tools": ["neuralforge-evaluate"]
+    },
+    {
+      "message": "calculate six sigma process capability",
+      "expected_tools": ["lssao-capability-calc"]
+    },
+    {
+      "message": "analyze statistical process control chart",
+      "expected_tools": ["lssao-spc-analyze"]
+    },
+    {
+      "message": "plan a design of experiments run",
+      "expected_tools": ["lssao-doe-plan"]
+    },
+    {
+      "message": "search for a stock photo image",
+      "expected_tools": ["unsplash-api"]
+    },
+    {
+      "message": "open this url in the browser",
+      "expected_tools": ["open-url-native"]
+    },
+    {
+      "message": "generate a cinematic video clip",
+      "expected_tools": ["seedance-api"]
+    },
+    {
+      "message": "convert text to voice narration",
+      "expected_tools": ["elevenlabs-tts"]
+    }
+  ]
+}

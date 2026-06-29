@@ -59,12 +59,12 @@ Return a JSON object:
     "tokenEstimate": 6000,
     "withinBudget": true
   },
-  "fallbacks": ["execute_javascript", "web_search"]
+  "fallbacks": ["execute-javascript-code", "web-search"]
 }
 
 ## RULES
-- Always include at least 3 tools if any match above 0.40
-- Always include fallbacks: execute_javascript, web_search, file_operations
+- Include matching tools above the configured threshold, currently 0.15
+- Always include fallbacks that exist in the active runtime index.
 - If no tools match above threshold, return top 3 by raw score
 - Token budget is 8700 tokens (~7 tools at 1200 each)
 - Be precise: only recommend tools that genuinely match the intent`

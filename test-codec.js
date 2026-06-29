@@ -44,7 +44,7 @@ const testCases = [
 ];
 
 console.log('╔══════════════════════════════════════════════════════════╗');
-console.log('║          AGNT TOOL CODEC — TEST SUITE v1.0.0            ║');
+console.log('║          AGNT TOOL CODEC - TEST SUITE v1.1.0            ║');
 console.log('╠══════════════════════════════════════════════════════════╣\n');
 
 let passed = 0;
