@@ -4,6 +4,23 @@
   "description": "Intent-based dynamic tool selection for AI agent orchestration.",
   "type": "module",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacksonjp0311-gif/agnt-tool-codec.git"
+  },
+  "homepage": "https://github.com/jacksonjp0311-gif/agnt-tool-codec#readme",
+  "bugs": {
+    "url": "https://github.com/jacksonjp0311-gif/agnt-tool-codec/issues"
+  },
+  "keywords": [
+    "agents",
+    "llm",
+    "tools",
+    "tool-selection",
+    "orchestration",
+    "openai",
+    "agnt"
+  ],
   "main": "./tool-codec.js",
   "exports": {
     ".": "./tool-codec.js",
@@ -13,7 +30,32 @@
     "agnt-tool-codec": "./tool-codec.mjs"
   },
   "scripts": {
+    "build:py": "python -m build",
+    "pack:npm": "npm pack",
     "test": "node tool-codec.mjs && node tool-codec.js --test && node test-codec.js",
     "query": "node tool-codec.mjs"
+  },
+  "files": [
+    "ARCHITECTURE.md",
+    "LICENSE",
+    "README.md",
+    "build-index.js",
+    "capability-index.json",
+    "codec-integration.js",
+    "config.json",
+    "dashboard.html",
+    "docs/",
+    "evals/",
+    "examples/",
+    "install.js",
+    "run-query.mjs",
+    "spec/",
+    "test-codec.js",
+    "tool-codec.js",
+    "tool-codec.mjs"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
   }
 }

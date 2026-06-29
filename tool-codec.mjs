@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // AGNT Tool Codec v1.0.0 — Intent-based dynamic tool selection
 // Usage: node tool-codec.mjs "check system health"
 

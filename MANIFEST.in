@@ -1,0 +1,8 @@
+include LICENSE
+include README.md
+include config.json
+include capability-index.json
+recursive-include docs *.md *.svg
+recursive-include evals *.json
+recursive-include examples *.py
+recursive-include spec *.json
