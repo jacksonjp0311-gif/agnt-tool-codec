@@ -1,99 +1,80 @@
-<svg width="1200" height="700" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="1200" height="1450" viewBox="0 0 1200 1450" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">AGNT Tool Codec benchmark findings</title>
-  <desc id="desc">A benchmark summary showing 89.1 percent estimated schema-token savings, 460,800 static tokens reduced to 50,400 selected tokens, 6 of 6 runtime-equivalent prompts covered, and 4 of 6 strict exact-name prompts covered.</desc>
+  <desc id="desc">Mobile-safe benchmark summary. The codec reduced estimated schema tokens from 460,800 to 50,400, an 89.1 percent reduction, with 6 of 6 runtime-equivalent prompts covered and 4 of 6 strict exact-name prompts covered.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="700" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="1450" gradientUnits="userSpaceOnUse">
       <stop stop-color="#07111F"/>
-      <stop offset="0.55" stop-color="#10243B"/>
+      <stop offset="0.55" stop-color="#10243A"/>
       <stop offset="1" stop-color="#081424"/>
     </linearGradient>
-    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#58F0FF"/>
-      <stop offset="1" stop-color="#4D9EFF"/>
-    </linearGradient>
     <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#A8FF8B"/>
-      <stop offset="1" stop-color="#25E6A8"/>
+      <stop stop-color="#B8FF8D"/>
+      <stop offset="1" stop-color="#28E6A6"/>
     </linearGradient>
     <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FFE28A"/>
+      <stop stop-color="#FFE08A"/>
       <stop offset="1" stop-color="#FF9A3D"/>
     </linearGradient>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" stroke="#2F4C68" stroke-opacity="0.24" stroke-width="1"/>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#5CF1FF"/>
+      <stop offset="1" stop-color="#4B9DFF"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#2E4C68" stroke-opacity="0.22" stroke-width="1"/>
     </pattern>
-    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.22 0 0 0 0 0.88 0 0 0 0 1 0 0 0 0.35 0"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
 
-  <rect width="1200" height="700" rx="28" fill="url(#bg)"/>
-  <rect width="1200" height="700" rx="28" fill="url(#grid)"/>
-  <path d="M72 544C236 438 404 598 574 494C750 386 866 484 1128 348" stroke="#58F0FF" stroke-opacity="0.16" stroke-width="2"/>
-  <path d="M86 156C266 250 428 90 604 188C760 274 932 116 1118 190" stroke="#A8FF8B" stroke-opacity="0.14" stroke-width="2"/>
+  <rect width="1200" height="1450" rx="36" fill="url(#bg)"/>
+  <rect width="1200" height="1450" rx="36" fill="url(#grid)"/>
+  <path d="M90 1138C294 1006 430 1198 626 1080C828 958 934 1056 1116 946" stroke="#58F0FF" stroke-opacity="0.16" stroke-width="3"/>
+  <path d="M90 202C286 304 454 128 642 236C812 334 962 174 1110 252" stroke="#A8FF8B" stroke-opacity="0.13" stroke-width="3"/>
 
-  <text x="64" y="74" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Benchmark Finding</text>
-  <text x="64" y="110" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16">Full AGNT-oriented capability index, six generic agent prompts, deterministic pre-model tool selection.</text>
+  <text x="80" y="100" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="58" font-weight="800">Benchmark Finding</text>
+  <text x="80" y="154" fill="#B4CCDD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28">AGNT-oriented index, six agent prompts.</text>
 
-  <g transform="translate(64 154)" filter="url(#softGlow)">
-    <rect x="0" y="0" width="338" height="216" rx="18" fill="#0E1D2E" stroke="url(#green)" stroke-width="2"/>
-    <text x="28" y="44" fill="#A8FF8B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="56" font-weight="800">89.1%</text>
-    <text x="30" y="78" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">estimated schema-token reduction</text>
-    <text x="30" y="112" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Static all-tools baseline compared with</text>
-    <text x="30" y="134" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">the codec-selected tool surface.</text>
-    <rect x="30" y="166" width="278" height="14" rx="7" fill="#203852"/>
-    <rect x="30" y="166" width="248" height="14" rx="7" fill="url(#green)"/>
-    <text x="30" y="198" fill="#89A9BF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Measured by the local eval harness, not a provider bill.</text>
+  <g transform="translate(80 220)">
+    <rect width="1040" height="290" rx="30" fill="#0E1D2E" stroke="url(#green)" stroke-width="4"/>
+    <text x="54" y="104" fill="#A8FF83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="104" font-weight="900">89.1%</text>
+    <text x="54" y="164" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="38" font-weight="800">estimated schema-token reduction</text>
+    <text x="54" y="218" fill="#B4CCDD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="26">Fewer tool schemas sent before the model call.</text>
   </g>
 
-  <g transform="translate(438 154)">
-    <rect x="0" y="0" width="698" height="216" rx="18" fill="#0E1D2E" stroke="#3E5E7E"/>
-    <text x="30" y="42" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Context Before and After</text>
-    <text x="30" y="72" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Estimated schema tokens across the six-prompt benchmark run.</text>
+  <g transform="translate(80 560)">
+    <rect width="1040" height="330" rx="30" fill="#0E1D2E" stroke="#3E5E7E" stroke-width="3"/>
+    <text x="54" y="70" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="38" font-weight="800">Context Before vs After</text>
 
-    <text x="30" y="118" fill="#FFCF70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Static all tools</text>
-    <rect x="180" y="104" width="430" height="28" rx="8" fill="#24364B" stroke="#5A728B"/>
-    <rect x="180" y="104" width="430" height="28" rx="8" fill="url(#amber)"/>
-    <text x="626" y="124" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">460,800</text>
+    <text x="54" y="134" fill="#FFCF70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">All tools</text>
+    <rect x="54" y="158" width="830" height="44" rx="14" fill="#24364B" stroke="#5A728B" stroke-width="2"/>
+    <rect x="54" y="158" width="830" height="44" rx="14" fill="url(#amber)"/>
+    <text x="906" y="192" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">460,800</text>
 
-    <text x="30" y="166" fill="#A8FF8B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Codec selected</text>
-    <rect x="180" y="152" width="430" height="28" rx="8" fill="#203852" stroke="#5A728B"/>
-    <rect x="180" y="152" width="47" height="28" rx="8" fill="url(#green)"/>
-    <text x="626" y="172" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">50,400</text>
+    <text x="54" y="254" fill="#A8FF83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">Codec selected</text>
+    <rect x="54" y="278" width="830" height="44" rx="14" fill="#203852" stroke="#5A728B" stroke-width="2"/>
+    <rect x="54" y="278" width="91" height="44" rx="14" fill="url(#green)"/>
+    <text x="906" y="312" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">50,400</text>
   </g>
 
-  <g transform="translate(64 410)">
-    <rect x="0" y="0" width="338" height="160" rx="18" fill="#0E1D2E" stroke="#3E5E7E"/>
-    <text x="28" y="42" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Selection Quality</text>
-    <text x="28" y="82" fill="#A8FF8B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">6 / 6</text>
-    <text x="122" y="82" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">runtime-equivalent prompts covered</text>
-    <text x="28" y="122" fill="#FFCF70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">4 / 6</text>
-    <text x="122" y="122" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">strict exact-name prompts covered</text>
+  <g transform="translate(80 940)">
+    <rect width="500" height="210" rx="28" fill="#0E1D2E" stroke="#3E5E7E" stroke-width="3"/>
+    <text x="42" y="62" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">Coverage</text>
+    <text x="42" y="126" fill="#A8FF83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="48" font-weight="900">6 / 6</text>
+    <text x="184" y="118" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="800">runtime</text>
+    <text x="184" y="152" fill="#B4CCDD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25">equivalent hits</text>
   </g>
 
-  <g transform="translate(438 410)">
-    <rect x="0" y="0" width="338" height="160" rx="18" fill="#0E1D2E" stroke="#3E5E7E"/>
-    <text x="28" y="42" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">What It Means</text>
-    <text x="28" y="78" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">The codec removed most repeated tool schema</text>
-    <text x="28" y="100" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">context while preserving a valid way to act.</text>
-    <text x="28" y="130" fill="#58F0FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Best use: pre-model compression layer.</text>
+  <g transform="translate(620 940)">
+    <rect width="500" height="210" rx="28" fill="#0E1D2E" stroke="#3E5E7E" stroke-width="3"/>
+    <text x="42" y="62" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">Strict Match</text>
+    <text x="42" y="126" fill="#FFCF70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="48" font-weight="900">4 / 6</text>
+    <text x="184" y="118" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="800">exact-name</text>
+    <text x="184" y="152" fill="#B4CCDD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25">tool hits</text>
   </g>
 
-  <g transform="translate(812 410)">
-    <rect x="0" y="0" width="324" height="160" rx="18" fill="#0E1D2E" stroke="#3E5E7E"/>
-    <text x="28" y="42" fill="#F4FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Caveat</text>
-    <text x="28" y="78" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">This is an estimate from schema counts.</text>
-    <text x="28" y="100" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Real savings should be confirmed with a</text>
-    <text x="28" y="122" fill="#ABC6DA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">provider tokenizer and production traces.</text>
+  <g transform="translate(80 1200)">
+    <rect width="1040" height="150" rx="28" fill="#0E1D2E" stroke="url(#cyan)" stroke-width="3"/>
+    <text x="42" y="58" fill="#F5FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="32" font-weight="800">What this proves</text>
+    <text x="42" y="104" fill="#B4CCDD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25">The codec can remove repeated schema context while keeping a valid tool path.</text>
   </g>
 
-  <g transform="translate(64 618)">
-    <text x="0" y="0" fill="#7F9CB3" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Run: agnt-tool-codec-eval --index capability-index.json --cases evals/demo-cases.json</text>
-    <text x="0" y="24" fill="#7F9CB3" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Result: cases=6 top1=1.000 top3=1.000 covered=1.000 strict=0.667 savings=0.891 tokens=50400/460800</text>
-  </g>
+  <text x="80" y="1400" fill="#87A4BA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22">Caveat: schema-token estimate. Confirm production savings with provider tokenizers and real traces.</text>
 </svg>
