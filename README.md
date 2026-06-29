@@ -113,6 +113,12 @@ Install locally:
 python -m pip install -e .
 ```
 
+Try it without building a capability index:
+
+```bash
+agnt-tool-codec-py --demo --names "push these changes to github"
+```
+
 Run the CLI:
 
 ```bash
@@ -129,6 +135,29 @@ result = codec.select("search for current AI news")
 
 for tool in result["selected"]:
     print(tool["tool"], tool["score"], tool["rationale"])
+```
+
+Filter OpenAI-style tool schemas:
+
+```python
+from agnt_tool_codec import filter_openai_tools
+
+filtered_tools, report = filter_openai_tools(
+    "push these changes to github",
+    openai_tools,
+)
+```
+
+Build metadata from Python callables:
+
+```python
+from agnt_tool_codec import capability_from_callable, select_tools
+
+def query_database():
+    """Query SQL customer records."""
+
+capabilities = [capability_from_callable(query_database)]
+print(select_tools("find customer records", capabilities)["selected"])
 ```
 
 ## Node
@@ -201,13 +230,15 @@ Run all local checks:
 ```bash
 npm test
 python -m unittest discover -s tests -v
+agnt-tool-codec-eval --cases evals/demo-cases.json
 ```
 
 Current local baseline:
 
 ```text
 Node smoke suite: 22/22 passing
-Python unit suite: 3/3 passing
+Python unit suite: 8/8 passing
+Demo eval: reports top-1/top-3/coverage metrics
 Default selection budget: 8,400 / 8,700 tokens
 ```
 

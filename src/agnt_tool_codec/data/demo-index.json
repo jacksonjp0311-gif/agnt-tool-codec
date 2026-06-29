@@ -1,0 +1,61 @@
+{
+  "version": "1.1.0",
+  "generated": "demo",
+  "sources": ["built-in demo"],
+  "tools": [
+    {
+      "name": "web_search",
+      "title": "Web Search",
+      "category": "core",
+      "domain": "data",
+      "intents": ["search", "analyze"],
+      "keywords": ["search", "find", "lookup", "research", "web", "news", "current"],
+      "description": "Search the web for current information."
+    },
+    {
+      "name": "github",
+      "title": "GitHub",
+      "category": "development",
+      "domain": "development",
+      "intents": ["deploy", "search", "create"],
+      "keywords": ["github", "git", "commit", "push", "pull", "request", "repo", "branch"],
+      "description": "Work with GitHub repositories, commits, branches, issues, and pull requests."
+    },
+    {
+      "name": "send_slack",
+      "title": "Send Slack Message",
+      "category": "communication",
+      "domain": "communication",
+      "intents": ["create"],
+      "keywords": ["slack", "message", "notify", "channel", "send", "team"],
+      "description": "Send a message or notification to a Slack channel."
+    },
+    {
+      "name": "query_database",
+      "title": "Query Database",
+      "category": "data",
+      "domain": "data",
+      "intents": ["search", "analyze"],
+      "keywords": ["database", "sql", "query", "table", "records", "customers"],
+      "description": "Query structured records from a SQL database."
+    },
+    {
+      "name": "execute_python",
+      "title": "Execute Python",
+      "category": "development",
+      "domain": "development",
+      "intents": ["create", "analyze", "fix"],
+      "keywords": ["python", "code", "script", "execute", "debug", "test", "calculate"],
+      "description": "Run Python code for analysis, debugging, or automation."
+    },
+    {
+      "name": "read_files",
+      "title": "Read Files",
+      "category": "system",
+      "domain": "system",
+      "intents": ["search", "analyze"],
+      "keywords": ["file", "files", "read", "directory", "inspect", "repo", "source"],
+      "description": "Read files and inspect directories."
+    }
+  ]
+}

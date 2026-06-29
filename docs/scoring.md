@@ -53,3 +53,15 @@ Scoring signals:
 
 The core library should not write logs or mutate state. Runtimes may add logging
 around the selection result.
+
+## Adapters
+
+The Python package includes helpers for common tool shapes:
+
+- `filter_openai_tools(message, tools)` filters OpenAI Chat/Responses function tools.
+- `capability_from_openai_tool(tool)` converts one OpenAI tool to codec metadata.
+- `capability_from_callable(func)` converts a Python callable using its name and docstring.
+
+Adapters are intentionally lossy: they infer domain, intent, and keywords from
+names/descriptions. For production indexes, richer hand-authored metadata will
+rank better.

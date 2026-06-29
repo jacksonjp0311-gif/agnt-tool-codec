@@ -1,6 +1,14 @@
 import unittest
 
-from agnt_tool_codec import ToolCodec, encode_intent, select_tools
+from agnt_tool_codec import (
+    ToolCodec,
+    capabilities_from_openai_tools,
+    capability_from_callable,
+    encode_intent,
+    filter_openai_tools,
+    select_tools,
+)
+from agnt_tool_codec.eval import run_eval
 
 
 TOOLS = [
@@ -55,6 +63,39 @@ class PythonCodecTests(unittest.TestCase):
         result = select_tools("push changes to github", (tool for tool in TOOLS))
         self.assertEqual(result["metadata"]["staticTokenEstimate"], len(TOOLS) * 1200)
         self.assertEqual(result["selected"][0]["tool"], "github-plugin")
+
+    def test_openai_adapter_filters_and_orders_tools(self):
+        openai_tools = [
+            {"type": "function", "function": {"name": "web_search", "description": "Search web news."}},
+            {"type": "function", "function": {"name": "github", "description": "Push commits to GitHub."}},
+        ]
+        filtered, report = filter_openai_tools("push this branch to github", openai_tools)
+        self.assertEqual(filtered[0]["function"]["name"], "github")
+        self.assertEqual(report["selected"][0]["tool"], "github")
+
+    def test_openai_adapter_builds_capabilities(self):
+        caps = capabilities_from_openai_tools([
+            {"type": "function", "function": {"name": "send_slack", "description": "Send a Slack message."}},
+        ])
+        self.assertEqual(caps[0]["name"], "send_slack")
+        self.assertIn("communication", caps[0]["domain"])
+
+    def test_callable_adapter_uses_docstring(self):
+        def query_database():
+            """Query SQL customer records."""
+
+        cap = capability_from_callable(query_database)
+        self.assertEqual(cap["name"], "query_database")
+        self.assertEqual(cap["domain"], "data")
+
+    def test_eval_runner_reports_top3(self):
+        codec = ToolCodec(TOOLS)
+        report = run_eval(codec, [
+            {"message": "push changes to github", "expected_tools": ["github-plugin"]},
+            {"message": "search AI news", "expected_tools": ["web-search"]},
+        ])
+        self.assertEqual(report["summary"]["cases"], 2)
+        self.assertEqual(report["summary"]["top3"], 2)
 
 
 if __name__ == "__main__":

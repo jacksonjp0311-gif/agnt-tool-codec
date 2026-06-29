@@ -25,6 +25,10 @@ dependencies = []
 
 [project.scripts]
 agnt-tool-codec-py = "agnt_tool_codec.cli:main"
+agnt-tool-codec-eval = "agnt_tool_codec.eval:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+agnt_tool_codec = ["data/*.json"]
