@@ -4,19 +4,7 @@ Intent-aware tool selection for agent runtimes.
 
 AGNT Tool Codec reads a user message, scores your available tools, and returns a small ranked shortlist. Instead of sending every tool schema to the model on every turn, your agent can send only the tools that are likely to matter.
 
-```text
-User message
-    |
-    v
-+-----------+      +-------------+      +------------+
-|  Encode   | ---> |    Score    | ---> |  Select    |
-| intent    |      | tool fit    |      | top tools  |
-+-----------+      +-------------+      +------------+
-    |                    |                    |
-    v                    v                    v
-intent/domain       confidence +         compact tool
-keywords            rationale            schema set
-```
+![AGNT Tool Codec flow](docs/assets/codec-flow.svg)
 
 ## Why This Exists
 
@@ -70,16 +58,34 @@ That keeps the selected set below the default `8,700` token budget while leaving
 
 ```text
 .
-|-- capability-index.json          # Tool capability manifest
-|-- config.json                    # Weights, patterns, budget, fallbacks
-|-- tool-codec.mjs                 # Small standalone Node runner
-|-- tool-codec.js                  # Node library and CLI
-|-- codec-integration.js           # AGNT-oriented integration module
-|-- src/agnt_tool_codec/           # Dependency-free Python package
-|-- spec/capability-index.schema.json
-|-- docs/scoring.md                # Language-neutral scoring contract
-|-- tests/test_python_codec.py
-`-- test-codec.js
+|-- README.md                         # Product overview and quick start
+|-- capability-index.json             # AGNT-oriented capability manifest
+|-- config.json                       # Weights, intent patterns, budget, fallbacks
+|-- tool-codec.mjs                    # Small standalone Node runner
+|-- tool-codec.js                     # Node library and CLI
+|-- codec-integration.js              # AGNT-oriented integration module
+|-- build-index.js                    # Manifest scanner for capability indexes
+|-- dashboard.html                    # Local visual dashboard for selection logs
+|-- src/
+|   `-- agnt_tool_codec/
+|       |-- core.py                   # Dependency-free Python scoring core
+|       |-- adapters.py               # OpenAI/callable adapter helpers
+|       |-- cli.py                    # agnt-tool-codec-py
+|       |-- eval.py                   # agnt-tool-codec-eval
+|       `-- data/demo-index.json      # Built-in try-it-now capability index
+|-- docs/
+|   |-- scoring.md                    # Language-neutral scoring contract
+|   `-- assets/codec-flow.svg         # README flow graphic
+|-- spec/
+|   `-- capability-index.schema.json  # Capability index schema
+|-- evals/
+|   `-- demo-cases.json               # Demo eval prompts and expected tools
+|-- examples/
+|   |-- python_cli.py                 # Basic Python package usage
+|   `-- openai_adapter.py             # OpenAI-style tool filtering example
+|-- tests/
+|   `-- test_python_codec.py          # Python unit tests
+`-- test-codec.js                     # Node smoke suite
 ```
 
 ## Before You Install

@@ -1,0 +1,115 @@
+<svg width="1200" height="560" viewBox="0 0 1200 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AGNT Tool Codec flow</title>
+  <desc id="desc">A futuristic flow diagram showing noisy tool schemas compressed into a focused tool set through intent encoding, deterministic scoring, and budget-aware selection.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08111F"/>
+      <stop offset="0.52" stop-color="#10233A"/>
+      <stop offset="1" stop-color="#0B1326"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#56F0FF"/>
+      <stop offset="1" stop-color="#54A6FF"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#A7FF83"/>
+      <stop offset="1" stop-color="#2EE6A6"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFE08A"/>
+      <stop offset="1" stop-color="#FF9F43"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.25 0 0 0 0 0.95 0 0 0 0 1 0 0 0 0.55 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" stroke="#2A4665" stroke-opacity="0.28" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2 2L10 6L2 10" fill="#56F0FF"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="560" rx="28" fill="url(#bg)"/>
+  <rect width="1200" height="560" rx="28" fill="url(#grid)"/>
+  <path d="M80 472 C260 372 382 510 548 408 C734 294 804 398 1126 280" stroke="#56F0FF" stroke-opacity="0.14" stroke-width="2"/>
+  <path d="M78 128 C260 206 400 70 560 164 C730 264 896 106 1120 176" stroke="#A7FF83" stroke-opacity="0.13" stroke-width="2"/>
+
+  <text x="62" y="72" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">AGNT Tool Codec</text>
+  <text x="62" y="106" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16">Compress tool bloat into a focused, explainable tool set before the model call.</text>
+
+  <g transform="translate(62 158)">
+    <rect x="0" y="0" width="220" height="228" rx="18" fill="#101D2E" stroke="#415D7A"/>
+    <text x="24" y="38" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Noisy tool stack</text>
+    <text x="24" y="66" fill="#9FB8CA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">40+ schemas, mixed domains</text>
+    <g fill="#1D324C" stroke="#4D6D8D">
+      <rect x="24" y="92" width="172" height="20" rx="6"/>
+      <rect x="24" y="122" width="140" height="20" rx="6"/>
+      <rect x="24" y="152" width="184" height="20" rx="6"/>
+      <rect x="24" y="182" width="118" height="20" rx="6"/>
+    </g>
+    <text x="24" y="212" fill="#FFCF70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">~77K schema tokens</text>
+  </g>
+
+  <path d="M304 272H380" stroke="url(#cyan)" stroke-width="3" marker-end="url(#arrow)" filter="url(#glow)"/>
+
+  <g transform="translate(386 138)" filter="url(#glow)">
+    <rect x="0" y="0" width="428" height="268" rx="22" fill="#0E1B2B" stroke="url(#cyan)" stroke-width="2"/>
+    <text x="32" y="44" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Codec core</text>
+    <text x="32" y="72" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Deterministic ranking. No model call required.</text>
+
+    <g transform="translate(32 104)">
+      <rect width="108" height="92" rx="14" fill="#112944" stroke="#56F0FF"/>
+      <text x="22" y="34" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Encode</text>
+      <text x="18" y="58" fill="#9FB8CA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">intent</text>
+      <text x="18" y="76" fill="#9FB8CA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">domain</text>
+    </g>
+    <path d="M154 150H190" stroke="#56F0FF" stroke-width="2" marker-end="url(#arrow)"/>
+    <g transform="translate(202 104)">
+      <rect width="108" height="92" rx="14" fill="#112944" stroke="#A7FF83"/>
+      <text x="26" y="34" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Score</text>
+      <text x="16" y="58" fill="#9FB8CA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">keywords</text>
+      <text x="16" y="76" fill="#9FB8CA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">rationale</text>
+    </g>
+    <path d="M324 150H360" stroke="#56F0FF" stroke-width="2" marker-end="url(#arrow)"/>
+    <g transform="translate(372 104)">
+      <rect width="24" height="92" rx="12" fill="#1C3856" stroke="#56F0FF"/>
+    </g>
+    <text x="32" y="232" fill="#2EE6A6" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Budget-aware: top 7 tools by default</text>
+  </g>
+
+  <path d="M836 272H912" stroke="url(#cyan)" stroke-width="3" marker-end="url(#arrow)" filter="url(#glow)"/>
+
+  <g transform="translate(934 158)">
+    <rect x="0" y="0" width="204" height="228" rx="18" fill="#0F221F" stroke="url(#green)" stroke-width="2"/>
+    <text x="24" y="38" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Focused context</text>
+    <text x="24" y="66" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">ranked, explainable tools</text>
+    <g fill="#14372F" stroke="#2EE6A6">
+      <rect x="24" y="92" width="154" height="24" rx="7"/>
+      <rect x="24" y="128" width="126" height="24" rx="7"/>
+      <rect x="24" y="164" width="96" height="24" rx="7"/>
+    </g>
+    <text x="24" y="212" fill="#A7FF83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">~8.4K schema tokens</text>
+  </g>
+
+  <g transform="translate(62 438)">
+    <rect width="318" height="62" rx="14" fill="#101D2E" stroke="#344F6C"/>
+    <text x="22" y="26" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Why it matters</text>
+    <text x="22" y="46" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Less schema noise, lower cost, more reasoning room.</text>
+  </g>
+  <g transform="translate(424 438)">
+    <rect width="318" height="62" rx="14" fill="#101D2E" stroke="#344F6C"/>
+    <text x="22" y="26" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Portable</text>
+    <text x="22" y="46" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Python, Node, OpenAI-style tools, AGNT manifests.</text>
+  </g>
+  <g transform="translate(786 438)">
+    <rect width="352" height="62" rx="14" fill="#101D2E" stroke="#344F6C"/>
+    <text x="22" y="26" fill="#F2FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Inspectable</text>
+    <text x="22" y="46" fill="#AFC8DD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Every choice includes score, domain, and rationale.</text>
+  </g>
+</svg>
