@@ -3,8 +3,10 @@ import unittest
 from agnt_tool_codec import (
     ToolCodec,
     capabilities_from_openai_tools,
+    capability_from_dict_tool,
     capability_from_callable,
     encode_intent,
+    filter_dict_tools,
     filter_openai_tools,
     select_tools,
 )
@@ -87,6 +89,17 @@ class PythonCodecTests(unittest.TestCase):
         cap = capability_from_callable(query_database)
         self.assertEqual(cap["name"], "query_database")
         self.assertEqual(cap["domain"], "data")
+
+    def test_generic_dict_adapter_filters_tools(self):
+        tools = [
+            {"name": "send_slack", "description": "Send a Slack message to the team."},
+            {"name": "query_database", "description": "Query SQL customer records."},
+        ]
+        cap = capability_from_dict_tool(tools[0])
+        self.assertEqual(cap["name"], "send_slack")
+        filtered, report = filter_dict_tools("send the team a slack update", tools)
+        self.assertEqual(filtered[0]["name"], "send_slack")
+        self.assertEqual(report["selected"][0]["tool"], "send_slack")
 
     def test_eval_runner_reports_top3(self):
         codec = ToolCodec(TOOLS)

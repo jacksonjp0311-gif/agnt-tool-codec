@@ -59,6 +59,7 @@ That keeps the selected set below the default `8,700` token budget while leaving
 ```text
 .
 |-- README.md                         # Product overview and quick start
+|-- .github/workflows/ci.yml          # Python/Node/build CI
 |-- capability-index.json             # AGNT-oriented capability manifest
 |-- config.json                       # Weights, intent patterns, budget, fallbacks
 |-- tool-codec.mjs                    # Small standalone Node runner
@@ -82,7 +83,8 @@ That keeps the selected set below the default `8,700` token budget while leaving
 |   `-- demo-cases.json               # Demo eval prompts and expected tools
 |-- examples/
 |   |-- python_cli.py                 # Basic Python package usage
-|   `-- openai_adapter.py             # OpenAI-style tool filtering example
+|   |-- openai_adapter.py             # OpenAI-style tool filtering example
+|   `-- generic_runtime.py            # Dict-tool filtering for custom runtimes
 |-- tests/
 |   `-- test_python_codec.py          # Python unit tests
 `-- test-codec.js                     # Node smoke suite
@@ -152,6 +154,19 @@ filtered_tools, report = filter_openai_tools(
     "push these changes to github",
     openai_tools,
 )
+```
+
+Filter any simple dict-based tool list:
+
+```python
+from agnt_tool_codec import filter_dict_tools
+
+tools = [
+    {"name": "web_search", "description": "Search the web."},
+    {"name": "send_slack", "description": "Send a Slack message."},
+]
+
+filtered_tools, report = filter_dict_tools("send the team an update", tools)
 ```
 
 Build metadata from Python callables:

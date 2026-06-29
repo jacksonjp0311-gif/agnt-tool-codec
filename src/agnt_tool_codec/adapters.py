@@ -70,6 +70,30 @@ def capability_from_openai_tool(tool: dict[str, Any]) -> dict[str, Any]:
     return _capability(name, description, category="openai")
 
 
+def capability_from_dict_tool(tool: dict[str, Any]) -> dict[str, Any]:
+    """Convert a generic dict tool into codec metadata."""
+
+    name = tool.get("name") or tool.get("tool") or tool.get("id")
+    if not name:
+        raise ValueError("tool is missing name/tool/id")
+
+    description = tool.get("description") or tool.get("doc") or ""
+    cap = _capability(str(name), str(description), title=tool.get("title"), category=tool.get("category", "tool"))
+    if tool.get("domain"):
+        cap["domain"] = tool["domain"]
+    if tool.get("intents"):
+        cap["intents"] = list(tool["intents"])
+    if tool.get("keywords"):
+        cap["keywords"] = list(tool["keywords"])
+    if tool.get("plugin"):
+        cap["plugin"] = tool["plugin"]
+    return cap
+
+
+def capabilities_from_dict_tools(tools: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [capability_from_dict_tool(tool) for tool in tools]
+
+
 def capabilities_from_openai_tools(tools: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return [capability_from_openai_tool(tool) for tool in tools]
 
@@ -102,6 +126,26 @@ def filter_openai_tools(
 
     def tool_name(tool: dict[str, Any]) -> str:
         return tool.get("function", tool).get("name") or tool.get("name") or ""
+
+    filtered = [tool for tool in tool_list if tool_name(tool) in rank]
+    filtered.sort(key=lambda tool: rank[tool_name(tool)])
+    return filtered, result
+
+
+def filter_dict_tools(
+    message: str,
+    tools: Iterable[dict[str, Any]],
+    config: dict[str, Any] | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Return generic dict tools filtered and ordered by codec selection."""
+
+    tool_list = list(tools)
+    capabilities = capabilities_from_dict_tools(tool_list)
+    result = select_tools(message, capabilities, config)
+    rank = {item["tool"]: index for index, item in enumerate(result["selected"])}
+
+    def tool_name(tool: dict[str, Any]) -> str:
+        return str(tool.get("name") or tool.get("tool") or tool.get("id") or "")
 
     filtered = [tool for tool in tool_list if tool_name(tool) in rank]
     filtered.sort(key=lambda tool: rank[tool_name(tool)])
